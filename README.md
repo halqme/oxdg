@@ -218,3 +218,11 @@ bun run release:check
 `build` uses `tsdown` to produce the ESM distribution, declarations, and source maps.
 
 `release:check` packs the package, validates the published contents, installs the packed artifact into a temporary project, and exercises the packaged CLI including version, circular dependency, JSON, and SVG checks.
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing expectations, performance work, and pull request guidance.
+
+Please report security vulnerabilities privately according to [SECURITY.md](SECURITY.md). Project participation is covered by the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Release history is maintained in [CHANGELOG.md](CHANGELOG.md).

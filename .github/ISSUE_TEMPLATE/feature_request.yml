@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a focused improvement to oxdg
+title: "feat: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        oxdg intentionally keeps a narrow dependency-graph scope. Describe the problem first so the proposed feature can be evaluated against that scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is difficult or impossible to do with oxdg today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the CLI or API behavior you would like.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: Show an example command, API call, input, or output if useful.
+      render: shell
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing flags, tools, or approaches you considered.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This proposal is related to dependency graph analysis, queries, rendering, module resolution, or CLI/API ergonomics.
+          required: true

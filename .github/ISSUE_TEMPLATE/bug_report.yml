@@ -1,0 +1,73 @@
+name: Bug report
+description: Report incorrect behavior or a regression in oxdg
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please provide a minimal reproduction when possible.
+        For security vulnerabilities, do not use this form; see SECURITY.md.
+
+  - type: input
+    id: version
+    attributes:
+      label: oxdg version
+      description: For example, 0.4.1 or a commit SHA.
+      placeholder: "0.4.1"
+    validations:
+      required: true
+
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime
+      description: Include Node.js or Bun version.
+      placeholder: "Node.js 24.21.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 26, Ubuntu 24.04, Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or API call
+      description: Show the smallest command or API call that reproduces the issue.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the relevant files, repository link, or steps needed to reproduce the issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include warnings, stderr, exit codes, or stack traces when relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that may help isolate the problem.
