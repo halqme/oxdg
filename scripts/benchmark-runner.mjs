@@ -80,9 +80,7 @@ function normalizeModuleId(cwd, value) {
 
 function summarizeModuleIds(cwd, ids) {
   const moduleIds = [...new Set(ids.map((id) => normalizeModuleId(cwd, id)))].sort();
-  const sourceModuleIds = moduleIds.filter((id) =>
-    extensionSet.has(extname(id).toLowerCase()),
-  );
+  const sourceModuleIds = moduleIds.filter((id) => extensionSet.has(extname(id).toLowerCase()));
   return {
     graphNodes: moduleIds.length,
     sourceModules: sourceModuleIds.length,
