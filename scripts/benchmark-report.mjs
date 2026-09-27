@@ -102,6 +102,11 @@ function normalizeRawWorkload(raw, workload, label) {
   return results;
 }
 
+function setDifference(left, right) {
+  const rightSet = new Set(right);
+  return left.filter((value) => !rightSet.has(value));
+}
+
 function revisionWorkload(rawResults, workload, revisionKey) {
   const oxdg = rawResults[revisionKey];
   const relativePerformance = Object.fromEntries(
@@ -110,22 +115,41 @@ function revisionWorkload(rawResults, workload, revisionKey) {
       return [tool, { ratioToOxdg: ratio, label: formatRelative(ratio) }];
     }),
   );
-  const graphModules = {
-    oxdg: workload.graphModules?.[revisionKey],
-    dpdm: workload.graphModules?.dpdm,
-    madge: workload.graphModules?.madge,
-  };
-  for (const [tool, count] of Object.entries(graphModules)) {
-    if (!Number.isInteger(count) || count < 1) {
-      throw new Error(`benchmark metadata is missing a positive graph module count for ${tool}`);
-    }
+
+  const baselineCoverage = workload.moduleCoverage?.[revisionKey];
+  if (
+    !baselineCoverage ||
+    !Number.isInteger(baselineCoverage.graphNodes) ||
+    !Number.isInteger(baselineCoverage.sourceModules) ||
+    !Array.isArray(baselineCoverage.sourceModuleIds)
+  ) {
+    throw new Error("benchmark metadata is missing oxdg module coverage");
   }
 
-  const resultWithModuleCost = (resultKey, moduleKey = resultKey) => ({
-    ...rawResults[resultKey],
-    graphModules: graphModules[moduleKey],
-    meanMsPerModule: rawResults[resultKey].meanMs / graphModules[moduleKey],
-  });
+  const resultWithCoverage = (resultKey, coverageKey = resultKey) => {
+    const coverage = workload.moduleCoverage?.[coverageKey];
+    if (
+      !coverage ||
+      !Number.isInteger(coverage.graphNodes) ||
+      !Number.isInteger(coverage.sourceModules) ||
+      !Array.isArray(coverage.sourceModuleIds) ||
+      coverage.sourceModules < 1
+    ) {
+      throw new Error(`benchmark metadata is missing module coverage for ${coverageKey}`);
+    }
+
+    return {
+      ...rawResults[resultKey],
+      graphNodes: coverage.graphNodes,
+      sourceModules: coverage.sourceModules,
+      meanMsPerSourceModule: rawResults[resultKey].meanMs / coverage.sourceModules,
+      sourceOnlyVsOxdg: setDifference(coverage.sourceModuleIds, baselineCoverage.sourceModuleIds),
+      sourceMissingVsOxdg: setDifference(
+        baselineCoverage.sourceModuleIds,
+        coverage.sourceModuleIds,
+      ),
+    };
+  };
 
   return {
     input: workload.input,
@@ -137,9 +161,9 @@ function revisionWorkload(rawResults, workload, revisionKey) {
       madge: workload.commands.madge,
     },
     results: {
-      oxdg: resultWithModuleCost(revisionKey, "oxdg"),
-      dpdm: resultWithModuleCost("dpdm"),
-      madge: resultWithModuleCost("madge"),
+      oxdg: resultWithCoverage(revisionKey, revisionKey),
+      dpdm: resultWithCoverage("dpdm"),
+      madge: resultWithCoverage("madge"),
     },
     relativePerformance,
   };
@@ -223,16 +247,41 @@ function comparisonReport(release, main) {
   );
 }
 
+function coverageNotesMarkdown(workload) {
+  const notes = [];
+  for (const tool of competitorOrder) {
+    const result = workload.results[tool];
+    if (result.sourceOnlyVsOxdg.length === 0 && result.sourceMissingVsOxdg.length === 0) {
+      continue;
+    }
+    const label = competitorLabels[tool];
+    const parts = [];
+    if (result.sourceMissingVsOxdg.length > 0) {
+      parts.push(
+        `missing ${result.sourceMissingVsOxdg.length}: ${result.sourceMissingVsOxdg.map((id) => `\`${id}\``).join(", ")}`,
+      );
+    }
+    if (result.sourceOnlyVsOxdg.length > 0) {
+      parts.push(
+        `additional ${result.sourceOnlyVsOxdg.length}: ${result.sourceOnlyVsOxdg.map((id) => `\`${id}\``).join(", ")}`,
+      );
+    }
+    notes.push(`- **${label} source coverage vs oxdg:** ${parts.join("; ")}`);
+  }
+  return notes;
+}
+
 function workloadTableMarkdown(workload) {
   return [
-    "| Tool | Graph modules | Mean | ms / module | Stddev | Median | Min | Max | Relative |",
-    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    "| Tool | Source modules | Graph nodes | Mean | ms / source module | Stddev | Median | Min | Max | Relative |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ...["oxdg", ...competitorOrder].map((tool) => {
       const result = workload.results[tool];
       const relative = tool === "oxdg" ? "1.00×" : workload.relativePerformance[tool].label;
       const label = tool === "oxdg" ? "oxdg" : competitorLabels[tool];
-      return `| ${label} | ${result.graphModules} | ${formatDuration(result.meanMs)} | ${formatModuleCost(result.meanMsPerModule)} | ${formatDuration(result.stddevMs)} | ${formatDuration(result.medianMs)} | ${formatDuration(result.minMs)} | ${formatDuration(result.maxMs)} | ${relative} |`;
+      return `| ${label} | ${result.sourceModules} | ${result.graphNodes} | ${formatDuration(result.meanMs)} | ${formatModuleCost(result.meanMsPerSourceModule)} | ${formatDuration(result.stddevMs)} | ${formatDuration(result.medianMs)} | ${formatDuration(result.minMs)} | ${formatDuration(result.maxMs)} | ${relative} |`;
     }),
+    ...coverageNotesMarkdown(workload),
   ];
 }
 
@@ -241,14 +290,15 @@ function headlineTableMarkdown(corpus) {
   return [
     `Corpus: ${workload.files} source files`,
     "",
-    "| Tool | Graph modules | Mean | ms / module | Relative |",
-    "| --- | ---: | ---: | ---: | ---: |",
+    "| Tool | Source modules | Graph nodes | Mean | ms / source module | Relative |",
+    "| --- | ---: | ---: | ---: | ---: | ---: |",
     ...["oxdg", ...competitorOrder].map((tool) => {
       const result = workload.results[tool];
       const relative = tool === "oxdg" ? "1.00×" : workload.relativePerformance[tool].label;
       const label = tool === "oxdg" ? "oxdg" : competitorLabels[tool];
-      return `| ${label} | ${result.graphModules} | ${formatDuration(result.meanMs)} | ${formatModuleCost(result.meanMsPerModule)} | ${relative} |`;
+      return `| ${label} | ${result.sourceModules} | ${result.graphNodes} | ${formatDuration(result.meanMs)} | ${formatModuleCost(result.meanMsPerSourceModule)} | ${relative} |`;
     }),
+    ...coverageNotesMarkdown(workload),
   ];
 }
 
@@ -262,7 +312,7 @@ function makeMarkdown(release, main, comparison) {
     "",
     "## Directory-wide throughput",
     "",
-    "Graph module counts are collected separately from the timed runs. ms / module is the mean CLI runtime divided by graph modules.",
+    "Module coverage is collected separately from the timed runs. Source modules count only files matching the benchmark JS/TS extensions; graph nodes may additionally include JSON or built-in modules depending on tool semantics. ms / source module uses the comparable source-module count.",
     "",
   ];
 
@@ -340,9 +390,10 @@ function revisionSection(report, id, eyebrow) {
         const relative = tool === "oxdg" ? "baseline" : workload.relativePerformance[tool].label;
         return `<tr class="${tool === "oxdg" ? "primary-row" : ""}">
           <th scope="row">${escapeHtml(label)}</th>
-          <td>${result.graphModules}</td>
+          <td>${result.sourceModules}</td>
+          <td>${result.graphNodes}</td>
           <td>${formatDuration(result.meanMs)}</td>
-          <td>${formatModuleCost(result.meanMsPerModule)}</td>
+          <td>${formatModuleCost(result.meanMsPerSourceModule)}</td>
           <td>± ${formatDuration(result.stddevMs)}</td>
           <td>${formatDuration(result.medianMs)}</td>
           <td>${formatDuration(result.minMs)}</td>
@@ -352,7 +403,7 @@ function revisionSection(report, id, eyebrow) {
       })
       .join("");
     return `<div class="table-wrap"><table>
-      <thead><tr><th>Tool</th><th>Graph modules</th><th>Mean</th><th>ms / module</th><th>Stddev</th><th>Median</th><th>Min</th><th>Max</th><th>Relative</th></tr></thead>
+      <thead><tr><th>Tool</th><th>Source modules</th><th>Graph nodes</th><th>Mean</th><th>ms / source module</th><th>Stddev</th><th>Median</th><th>Min</th><th>Max</th><th>Relative</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
   };
@@ -376,6 +427,30 @@ function revisionSection(report, id, eyebrow) {
   </section>`;
 }
 
+function coverageNotesHtml(workload) {
+  const notes = competitorOrder
+    .map((tool) => {
+      const result = workload.results[tool];
+      if (result.sourceOnlyVsOxdg.length === 0 && result.sourceMissingVsOxdg.length === 0) {
+        return "";
+      }
+      const parts = [];
+      if (result.sourceMissingVsOxdg.length > 0) {
+        parts.push(
+          `missing ${result.sourceMissingVsOxdg.length}: ${result.sourceMissingVsOxdg.map((id) => `<code>${escapeHtml(id)}</code>`).join(", ")}`,
+        );
+      }
+      if (result.sourceOnlyVsOxdg.length > 0) {
+        parts.push(
+          `additional ${result.sourceOnlyVsOxdg.length}: ${result.sourceOnlyVsOxdg.map((id) => `<code>${escapeHtml(id)}</code>`).join(", ")}`,
+        );
+      }
+      return `<li><strong>${escapeHtml(competitorLabels[tool])} source coverage vs oxdg:</strong> ${parts.join("; ")}</li>`;
+    })
+    .filter(Boolean);
+  return notes.length > 0 ? `<ul class="coverage-notes">${notes.join("")}</ul>` : "";
+}
+
 function headlineThroughputHtml(report) {
   return corpusOrder
     .map((key) => {
@@ -388,9 +463,10 @@ function headlineThroughputHtml(report) {
           const relative = tool === "oxdg" ? "baseline" : workload.relativePerformance[tool].label;
           return `<tr class="${tool === "oxdg" ? "primary-row" : ""}">
             <th scope="row">${escapeHtml(label)}</th>
-            <td>${result.graphModules}</td>
+            <td>${result.sourceModules}</td>
+            <td>${result.graphNodes}</td>
             <td>${formatDuration(result.meanMs)}</td>
-            <td>${formatModuleCost(result.meanMsPerModule)}</td>
+            <td>${formatModuleCost(result.meanMsPerSourceModule)}</td>
             <td>${escapeHtml(relative)}</td>
           </tr>`;
         })
@@ -398,9 +474,10 @@ function headlineThroughputHtml(report) {
       return `<article class="panel throughput-panel">
         <div class="throughput-heading"><div><p class="eyebrow">${escapeHtml(corpus.profile)}</p><h3>${escapeHtml(corpus.name)}</h3></div><span>${workload.files} source files in corpus</span></div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Tool</th><th>Graph modules</th><th>Mean</th><th>ms / module</th><th>Relative</th></tr></thead>
+          <thead><tr><th>Tool</th><th>Source modules</th><th>Graph nodes</th><th>Mean</th><th>ms / source module</th><th>Relative</th></tr></thead>
           <tbody>${rows}</tbody>
         </table></div>
+        ${coverageNotesHtml(workload)}
       </article>`;
     })
     .join("");
@@ -438,7 +515,7 @@ function makeHtml(release, main, comparison, generatedAt) {
 .corpus-stats{display:flex;gap:1rem}.corpus-stats div{text-align:right}.corpus-stats span{display:block;color:var(--muted);font-size:.8rem}.corpus-stats strong{font-size:1.2rem}.workload{padding-top:1rem}.workload h4{margin:.2rem 0 .7rem}
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:.65rem}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;white-space:nowrap}th,td{padding:.65rem .75rem;border-bottom:1px solid var(--border);text-align:right}th:first-child,td:first-child{text-align:left}thead th{background:var(--soft);color:var(--muted);font-size:.8rem}tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}.primary-row{background:var(--accent-soft)}.primary-row th{color:var(--accent)}
 .footprint-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}.footprint-grid>div{background:var(--soft);border-radius:.65rem;padding:.8rem}.footprint-grid span{display:block;color:var(--muted);font-size:.8rem}
-details.panel summary{cursor:pointer;font-weight:650}footer{margin-top:1.5rem;color:var(--muted);font-size:.85rem}
+.coverage-notes{margin:.8rem 0 0;padding-left:1.25rem;color:var(--muted);font-size:.9rem}.coverage-notes li+li{margin-top:.3rem}details.panel summary{cursor:pointer;font-weight:650}footer{margin-top:1.5rem;color:var(--muted);font-size:.85rem}
 @media(max-width:760px){main{width:min(100% - 1rem,1120px);padding-top:2rem}.overview,.delta-grid,.footprint-grid{grid-template-columns:1fr}.corpus-heading{display:block}.corpus-stats{margin-top:.8rem}.corpus-stats div{text-align:left}}
 </style>
 </head>
@@ -452,8 +529,8 @@ details.panel summary{cursor:pointer;font-weight:650}footer{margin-top:1.5rem;co
 <div class="overview-card"><span>Development</span><strong>${escapeHtml(main.revision.gitCommit.slice(0, 12))}</strong><small>main commit · same runner</small></div>
 </section>
 
-<section class="throughput"><p class="eyebrow">Stable throughput</p><h2>Directory-wide cost per graph module</h2>
-<p class="section-copy">Module counts come from separate untimed JSON probes. ms / module amortizes CLI startup, discovery, resolution, parsing, and graph construction over modules present in each tool's output graph.</p>
+<section class="throughput"><p class="eyebrow">Stable throughput</p><h2>Directory-wide cost per source module</h2>
+<p class="section-copy">Coverage comes from separate untimed probes. Source modules count only files matching the benchmark JS/TS extensions, while graph nodes may also include JSON or built-in modules depending on tool semantics. ms / source module amortizes CLI startup, discovery, resolution, parsing, and graph construction over comparable source modules.</p>
 ${headlineThroughputHtml(release)}</section>
 
 <section><p class="eyebrow">Development vs released</p><h2>Since latest release</h2><div class="delta-grid">${sinceCards}</div></section>
@@ -468,7 +545,7 @@ ${revisionSection(main, "development", "Development")}
 </div></section>
 
 <details class="panel"><summary>Methodology and environment</summary>
-<p>Released oxdg, main oxdg, dpdm, and Madge are executed in the same hyperfine runs against pinned Hono and Webpack corpora. Graph module counts are collected in separate untimed JSON probes after timing. ms / module is mean CLI runtime divided by graph modules and is not parser-only time.</p>
+<p>Released oxdg, main oxdg, dpdm, and Madge are executed in the same hyperfine runs against pinned Hono and Webpack corpora. Coverage is collected in separate untimed probes after timing. Source modules are restricted to the configured JS/TS extensions; graph nodes can additionally include JSON or built-ins depending on tool semantics. ms / source module is not parser-only time.</p>
 <p>Runner: ${escapeHtml(release.environment.runner.label)} · CPU: ${escapeHtml(cpuDetails(release.environment.host.cpu))} · Node ${escapeHtml(release.environment.runtimes.node.actual)} · ${release.benchmark.warmup} warmups / ${release.benchmark.runs} measured runs.</p>
 <p>Generated ${escapeHtml(generatedAt)}.</p></details>
 <footer><a href="release.json">Released JSON</a> · <a href="main.json">Main JSON</a> · <a href="latest.json">Combined JSON</a></footer>
@@ -492,7 +569,7 @@ const release = revisionReport(metadata, raw, "release", generatedAt);
 const main = revisionReport(metadata, raw, "main", generatedAt);
 const comparison = comparisonReport(release, main);
 const combined = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   generatedAt,
   release,
   main,
