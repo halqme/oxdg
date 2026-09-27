@@ -119,7 +119,7 @@ jobs:
           }
 
           async function madgeSet(cwd, input) {
-            const res = await madge(input, { fileExtensions: extensions, baseDir: cwd });
+            const res = await madge(resolve(cwd, input), { fileExtensions: extensions, baseDir: cwd });
             return new Set(Object.keys(res.obj()).map((p) => norm(cwd, p)));
           }
 
