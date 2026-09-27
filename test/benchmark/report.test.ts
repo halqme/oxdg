@@ -9,17 +9,18 @@ const extensions = ["js", "jsx", "ts", "tsx", "mjs", "cjs", "mts", "cts"];
 
 function commands(directoryInput: string, entrypointInput: string) {
   const list = extensions.join(",");
+  const dpdmList = extensions.map((extension) => `.${extension}`).join(",");
   return {
     directory: {
       release: `node "$OXDG_RELEASE_CLI" --extensions ${list} ${directoryInput}`,
       main: `node "$OXDG_MAIN_CLI" --extensions ${list} ${directoryInput}`,
-      dpdm: `dpdm '${directoryInput}/**/*.{${list}}'`,
+      dpdm: `dpdm --extensions ${dpdmList} --js ${dpdmList} '${directoryInput}/**/*.{${list}}'`,
       madge: `madge --extensions ${list} ${directoryInput}`,
     },
     entrypoint: {
       release: `node "$OXDG_RELEASE_CLI" --extensions ${list} ${entrypointInput}`,
       main: `node "$OXDG_MAIN_CLI" --extensions ${list} ${entrypointInput}`,
-      dpdm: `dpdm --extensions ${list} ${entrypointInput}`,
+      dpdm: `dpdm --extensions ${dpdmList} --js ${dpdmList} ${entrypointInput}`,
       madge: `madge --extensions ${list} ${entrypointInput}`,
     },
   };
@@ -112,13 +113,23 @@ function metadata() {
             input: "src",
             extensions,
             files: 311,
-            graphModules: { release: 300, main: 305, dpdm: 290, madge: 280 },
+            moduleCoverage: {
+              release: { graphNodes: 301, sourceModules: 300, sourceModuleIds: ["a.ts", "b.ts"] },
+              main: { graphNodes: 306, sourceModules: 300, sourceModuleIds: ["a.ts", "b.ts"] },
+              dpdm: { graphNodes: 310, sourceModules: 299, sourceModuleIds: ["a.ts"] },
+              madge: { graphNodes: 305, sourceModules: 301, sourceModuleIds: ["a.ts", "b.ts", "c.ts"] },
+            },
             commands: honoCommands.directory,
           },
           entrypoint: {
             input: "src/index.ts",
             extensions,
-            graphModules: { release: 100, main: 102, dpdm: 98, madge: 96 },
+            moduleCoverage: {
+              release: { graphNodes: 100, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              main: { graphNodes: 102, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              dpdm: { graphNodes: 98, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              madge: { graphNodes: 96, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+            },
             commands: honoCommands.entrypoint,
           },
         },
@@ -133,13 +144,23 @@ function metadata() {
             input: "lib",
             extensions,
             files: 776,
-            graphModules: { release: 760, main: 765, dpdm: 750, madge: 740 },
+            moduleCoverage: {
+              release: { graphNodes: 817, sourceModules: 817, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              main: { graphNodes: 817, sourceModules: 817, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              dpdm: { graphNodes: 862, sourceModules: 816, sourceModuleIds: ["lib/a.js"] },
+              madge: { graphNodes: 845, sourceModules: 816, sourceModuleIds: ["lib/a.js"] },
+            },
             commands: webpackCommands.directory,
           },
           entrypoint: {
             input: "lib/index.js",
             extensions,
-            graphModules: { release: 730, main: 735, dpdm: 720, madge: 710 },
+            moduleCoverage: {
+              release: { graphNodes: 793, sourceModules: 793, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              main: { graphNodes: 793, sourceModules: 793, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              dpdm: { graphNodes: 838, sourceModules: 792, sourceModuleIds: ["lib/a.js"] },
+              madge: { graphNodes: 821, sourceModules: 792, sourceModuleIds: ["lib/a.js"] },
+            },
             commands: webpackCommands.entrypoint,
           },
         },
@@ -215,17 +236,31 @@ test("generates stable and development benchmark reports", async () => {
     expect(release.revision).toMatchObject({ key: "release", source: "npm", version: "0.3.0" });
     expect(release.corpora.hono.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 500,
-      graphModules: 300,
-      meanMsPerModule: 500 / 300,
+      graphNodes: 301,
+      sourceModules: 300,
+      meanMsPerSourceModule: 500 / 300,
+      sourceOnlyVsOxdg: [],
+      sourceMissingVsOxdg: [],
     });
     expect(release.corpora.hono.workloads.directory.results.dpdm).toMatchObject({
-      graphModules: 290,
-      meanMsPerModule: 1000 / 290,
+      graphNodes: 310,
+      sourceModules: 299,
+      meanMsPerSourceModule: 1000 / 299,
+      sourceMissingVsOxdg: ["b.ts"],
+    });
+    expect(release.corpora.hono.workloads.directory.results.madge).toMatchObject({
+      graphNodes: 305,
+      sourceModules: 301,
+      sourceOnlyVsOxdg: ["c.ts"],
     });
     expect(release.corpora.webpack.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 1000,
-      graphModules: 760,
-      meanMsPerModule: 1000 / 760,
+      graphNodes: 817,
+      sourceModules: 817,
+      meanMsPerSourceModule: 1000 / 817,
+    });
+    expect(release.corpora.webpack.workloads.directory.results.dpdm).toMatchObject({
+      sourceMissingVsOxdg: ["hot/emitter-event-target.js"],
     });
     expect(release.corpora.hono.workloads.directory.relativePerformance.madge).toMatchObject({
       ratioToOxdg: 4,
@@ -239,16 +274,18 @@ test("generates stable and development benchmark reports", async () => {
     });
     expect(main.corpora.hono.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 250,
-      graphModules: 305,
-      meanMsPerModule: 250 / 305,
+      graphNodes: 306,
+      sourceModules: 300,
+      meanMsPerSourceModule: 250 / 300,
     });
     expect(main.corpora.webpack.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 500,
-      graphModules: 765,
-      meanMsPerModule: 500 / 765,
+      graphNodes: 817,
+      sourceModules: 817,
+      meanMsPerSourceModule: 500 / 817,
     });
 
-    expect(combined.schemaVersion).toBe(2);
+    expect(combined.schemaVersion).toBe(3);
     expect(combined.sinceRelease.hono.directory).toMatchObject({
       releaseMs: 500,
       mainMs: 250,
@@ -259,8 +296,10 @@ test("generates stable and development benchmark reports", async () => {
     const summary = await readFile(join(output, "summary.md"), "utf8");
     expect(summary).toContain("Released — oxdg v0.3.0");
     expect(summary).toContain("Directory-wide throughput");
-    expect(summary).toContain("Graph modules");
-    expect(summary).toContain("ms / module");
+    expect(summary).toContain("Source modules");
+    expect(summary).toContain("Graph nodes");
+    expect(summary).toContain("ms / source module");
+    expect(summary).toContain("missing 1: `b.ts`");
     expect(summary).toContain("Development — main @ abcdef123456");
     expect(summary).toContain("Since latest release");
     expect(summary).toContain("-50.0%");
@@ -278,10 +317,12 @@ test("generates stable and development benchmark reports", async () => {
 
     const page = await readFile(join(output, "index.html"), "utf8");
     expect(page).toContain("Released v0.3.0");
-    expect(page).toContain("Directory-wide cost per graph module");
+    expect(page).toContain("Directory-wide cost per source module");
     expect(page).toContain("311 source files in corpus");
-    expect(page).toContain("Graph modules");
-    expect(page).toContain("ms / module");
+    expect(page).toContain("Source modules");
+    expect(page).toContain("Graph nodes");
+    expect(page).toContain("ms / source module");
+    expect(page).toContain("hot/emitter-event-target.js");
     expect(page).toContain("Development main");
     expect(page).toContain("Since latest release");
     expect(page).toContain("release.json");
