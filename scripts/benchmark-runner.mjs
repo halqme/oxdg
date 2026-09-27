@@ -1,6 +1,6 @@
 import { execFile as execFileCallback, execFileSync } from "node:child_process";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { extname, join, resolve } from "node:path";
+import { extname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
@@ -67,15 +67,30 @@ async function execJson(command, args, cwd, label) {
   }
 }
 
-function countObjectKeys(value, label) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error(`${label} probe did not return an object graph`);
+function normalizeModuleId(cwd, value) {
+  let moduleId = String(value).replaceAll("\\", "/");
+  if (isAbsolute(moduleId)) {
+    moduleId = relative(cwd, moduleId).replaceAll("\\", "/");
   }
-  return Object.keys(value).length;
+  while (moduleId.startsWith("./")) {
+    moduleId = moduleId.slice(2);
+  }
+  return moduleId;
 }
 
-async function probeGraphModules({ cwd, directoryInput, entrypointInput, label }) {
+function summarizeModuleIds(cwd, ids) {
+  const moduleIds = [...new Set(ids.map((id) => normalizeModuleId(cwd, id)))].sort();
+  const sourceModuleIds = moduleIds.filter((id) => extensionSet.has(extname(id).toLowerCase()));
+  return {
+    graphNodes: moduleIds.length,
+    sourceModules: sourceModuleIds.length,
+    sourceModuleIds,
+  };
+}
+
+async function probeModuleCoverage({ cwd, directoryInput, entrypointInput, label }) {
   const extensionList = extensions.join(",");
+  const dpdmExtensionList = extensions.map((extension) => `.${extension}`).join(",");
   const dpdmOutput = join(outputDirectory, `benchmark-${label}-dpdm-probe.json`);
 
   async function probeOxdg(cli, input, probeLabel) {
@@ -88,23 +103,26 @@ async function probeGraphModules({ cwd, directoryInput, entrypointInput, label }
     if (!Array.isArray(result?.modules)) {
       throw new Error(`${probeLabel} probe is missing modules`);
     }
-    return result.modules.length;
+    return summarizeModuleIds(
+      cwd,
+      result.modules.map((module) => module.id),
+    );
   }
 
   async function probeMadge(input, probeLabel) {
     const script =
-      'const madge = require(process.argv[1]); madge(process.argv[2], { fileExtensions: process.argv[3].split(",") }).then((result) => process.stdout.write(String(Object.keys(result.obj()).length))).catch((error) => { console.error(error); process.exitCode = 1; });';
+      'const path = require("node:path"); const madge = require(process.argv[1]); const cwd = process.argv[2]; const input = path.resolve(cwd, process.argv[3]); madge(input, { baseDir: cwd, fileExtensions: process.argv[4].split(",") }).then((result) => process.stdout.write(JSON.stringify(Object.keys(result.obj())))).catch((error) => { console.error(error); process.exitCode = 1; });';
     try {
       const { stdout } = await execFile(
         process.execPath,
-        ["-e", script, madgePackageDirectory, input, extensionList],
-        { cwd, maxBuffer: 1024 * 1024 },
+        ["-e", script, madgePackageDirectory, cwd, input, extensionList],
+        { cwd, maxBuffer: 20 * 1024 * 1024 },
       );
-      const count = Number(stdout.trim());
-      if (!Number.isInteger(count) || count < 0) {
-        throw new Error(`${probeLabel} probe returned an invalid module count`);
+      const ids = JSON.parse(stdout);
+      if (!Array.isArray(ids)) {
+        throw new Error(`${probeLabel} probe did not return module ids`);
       }
-      return count;
+      return summarizeModuleIds(cwd, ids);
     } catch (error) {
       const detail = [error.stdout, error.stderr].filter(Boolean).join("\n");
       throw new Error(`${probeLabel} probe failed${detail ? `:\n${detail}` : ""}`, {
@@ -120,7 +138,9 @@ async function probeGraphModules({ cwd, directoryInput, entrypointInput, label }
         dpdmCli,
         [
           "--extensions",
-          extensionList,
+          dpdmExtensionList,
+          "--js",
+          dpdmExtensionList,
           input,
           "--output",
           dpdmOutput,
@@ -134,7 +154,10 @@ async function probeGraphModules({ cwd, directoryInput, entrypointInput, label }
       if (!result?.tree || typeof result.tree !== "object" || Array.isArray(result.tree)) {
         throw new Error(`${probeLabel} probe is missing tree`);
       }
-      return Object.values(result.tree).filter((dependencies) => dependencies !== null).length;
+      const ids = Object.entries(result.tree)
+        .filter(([, dependencies]) => dependencies !== null)
+        .map(([id]) => id);
+      return summarizeModuleIds(cwd, ids);
     } finally {
       await rm(dpdmOutput, { force: true });
     }
@@ -188,17 +211,18 @@ async function runHyperfine({ commands, output, cwd, env }) {
 
 function commandsFor(directoryInput, entrypointInput) {
   const extensionList = extensions.join(",");
+  const dpdmExtensionList = extensions.map((extension) => `.${extension}`).join(",");
   return {
     directory: {
       release: `"$OXDG_RELEASE_CLI" --extensions ${extensionList} ${directoryInput}`,
       main: `"$OXDG_MAIN_CLI" --extensions ${extensionList} ${directoryInput}`,
-      dpdm: `"$DPDM_CLI" '${directoryInput}/**/*.{${extensionList}}'`,
+      dpdm: `"$DPDM_CLI" --extensions ${dpdmExtensionList} --js ${dpdmExtensionList} '${directoryInput}/**/*.{${extensionList}}'`,
       madge: `"$MADGE_CLI" --extensions ${extensionList} ${directoryInput}`,
     },
     entrypoint: {
       release: `"$OXDG_RELEASE_CLI" --extensions ${extensionList} ${entrypointInput}`,
       main: `"$OXDG_MAIN_CLI" --extensions ${extensionList} ${entrypointInput}`,
-      dpdm: `"$DPDM_CLI" --extensions ${extensionList} ${entrypointInput}`,
+      dpdm: `"$DPDM_CLI" --extensions ${dpdmExtensionList} --js ${dpdmExtensionList} ${entrypointInput}`,
       madge: `"$MADGE_CLI" --extensions ${extensionList} ${entrypointInput}`,
     },
   };
@@ -301,7 +325,7 @@ for (const definition of corpusDefinitions) {
     env,
   });
 
-  const graphModules = await probeGraphModules({
+  const moduleCoverage = await probeModuleCoverage({
     cwd: definition.directory,
     directoryInput: definition.directoryInput,
     entrypointInput: definition.entrypointInput,
@@ -325,14 +349,14 @@ for (const definition of corpusDefinitions) {
         input: definition.directoryInput,
         extensions,
         files: sourceFileCount,
-        graphModules: graphModules.directory,
+        moduleCoverage: moduleCoverage.directory,
         commands: commands.directory,
         workingDirectory: definition.directory,
       },
       entrypoint: {
         input: definition.entrypointInput,
         extensions,
-        graphModules: graphModules.entrypoint,
+        moduleCoverage: moduleCoverage.entrypoint,
         commands: commands.entrypoint,
         workingDirectory: definition.directory,
       },
@@ -343,7 +367,7 @@ for (const definition of corpusDefinitions) {
     `Benchmarked ${sourceFileCount} files in ${definition.name} ${definition.directoryInput} at ${commit}`,
   );
   console.log(
-    `Graph modules (${definition.key}): directory ${JSON.stringify(graphModules.directory)}, entrypoint ${JSON.stringify(graphModules.entrypoint)}`,
+    `Module coverage (${definition.key}): directory ${JSON.stringify(moduleCoverage.directory)}, entrypoint ${JSON.stringify(moduleCoverage.entrypoint)}`,
   );
 }
 

@@ -42,7 +42,7 @@ async function writeOxdgConsumer(workspace: string, key: string, version: string
   await writeFile(join(packageDirectory, "dist", "cli", "main.js"), "#!/usr/bin/env node\n");
   await writeExecutable(
     join(binDirectory, "oxdg"),
-    'console.log(JSON.stringify({ modules: [{ id: "a" }, { id: "b" }] }));\n',
+    'console.log(JSON.stringify({ modules: [{ id: "a.js" }, { id: "b.js" }] }));\n',
   );
 }
 
@@ -194,34 +194,36 @@ test("records released and main revisions against both benchmark corpora", async
 
     expect(metadata.corpora.hono.workloads.directory.files).toBe(3);
     expect(metadata.corpora.webpack.workloads.directory.files).toBe(2);
-    expect(metadata.corpora.hono.workloads.directory.graphModules).toEqual({
-      release: 2,
-      main: 2,
-      dpdm: 2,
-      madge: 2,
-    });
-    expect(metadata.corpora.hono.workloads.entrypoint.graphModules).toEqual({
-      release: 2,
-      main: 2,
-      dpdm: 2,
-      madge: 2,
-    });
-    expect(metadata.corpora.webpack.workloads.directory.graphModules).toEqual({
-      release: 2,
-      main: 2,
-      dpdm: 2,
-      madge: 2,
-    });
-    expect(metadata.corpora.webpack.workloads.entrypoint.graphModules).toEqual({
-      release: 2,
-      main: 2,
-      dpdm: 2,
-      madge: 2,
-    });
+    for (const corpus of ["hono", "webpack"]) {
+      for (const workload of ["directory", "entrypoint"]) {
+        expect(metadata.corpora[corpus].workloads[workload].moduleCoverage).toEqual({
+          release: {
+            graphNodes: 2,
+            sourceModules: 2,
+            sourceModuleIds: ["a.js", "b.js"],
+          },
+          main: {
+            graphNodes: 2,
+            sourceModules: 2,
+            sourceModuleIds: ["a.js", "b.js"],
+          },
+          dpdm: {
+            graphNodes: 2,
+            sourceModules: 2,
+            sourceModuleIds: ["a.js", "b.js"],
+          },
+          madge: {
+            graphNodes: 2,
+            sourceModules: 2,
+            sourceModuleIds: ["a.js", "b.js"],
+          },
+        });
+      }
+    }
     expect(metadata.corpora.hono.workloads.directory.commands).toEqual({
       release: '"$OXDG_RELEASE_CLI" --extensions js,jsx,ts,tsx,mjs,cjs,mts,cts src',
       main: '"$OXDG_MAIN_CLI" --extensions js,jsx,ts,tsx,mjs,cjs,mts,cts src',
-      dpdm: "\"$DPDM_CLI\" 'src/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}'",
+      dpdm: "\"$DPDM_CLI\" --extensions .js,.jsx,.ts,.tsx,.mjs,.cjs,.mts,.cts --js .js,.jsx,.ts,.tsx,.mjs,.cjs,.mts,.cts 'src/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}'",
       madge: '"$MADGE_CLI" --extensions js,jsx,ts,tsx,mjs,cjs,mts,cts src',
     });
     expect(metadata.benchmark).toEqual({ warmup: 2, runs: 5 });
