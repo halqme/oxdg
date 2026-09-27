@@ -114,10 +114,10 @@ function metadata() {
             extensions,
             files: 311,
             moduleCoverage: {
-              release: { graphNodes: 301, sourceModules: 300, sourceModuleIds: ["a.ts", "b.ts"] },
-              main: { graphNodes: 306, sourceModules: 300, sourceModuleIds: ["a.ts", "b.ts"] },
-              dpdm: { graphNodes: 310, sourceModules: 299, sourceModuleIds: ["a.ts"] },
-              madge: { graphNodes: 305, sourceModules: 301, sourceModuleIds: ["a.ts", "b.ts", "c.ts"] },
+              release: { graphNodes: 3, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              main: { graphNodes: 4, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              dpdm: { graphNodes: 3, sourceModules: 1, sourceModuleIds: ["a.ts"] },
+              madge: { graphNodes: 4, sourceModules: 3, sourceModuleIds: ["a.ts", "b.ts", "c.ts"] },
             },
             commands: honoCommands.directory,
           },
@@ -125,10 +125,10 @@ function metadata() {
             input: "src/index.ts",
             extensions,
             moduleCoverage: {
-              release: { graphNodes: 100, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
-              main: { graphNodes: 102, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
-              dpdm: { graphNodes: 98, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
-              madge: { graphNodes: 96, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              release: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              main: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              dpdm: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
+              madge: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["a.ts", "b.ts"] },
             },
             commands: honoCommands.entrypoint,
           },
@@ -145,10 +145,10 @@ function metadata() {
             extensions,
             files: 776,
             moduleCoverage: {
-              release: { graphNodes: 817, sourceModules: 817, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
-              main: { graphNodes: 817, sourceModules: 817, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
-              dpdm: { graphNodes: 862, sourceModules: 816, sourceModuleIds: ["lib/a.js"] },
-              madge: { graphNodes: 845, sourceModules: 816, sourceModuleIds: ["lib/a.js"] },
+              release: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              main: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              dpdm: { graphNodes: 3, sourceModules: 1, sourceModuleIds: ["lib/a.js"] },
+              madge: { graphNodes: 2, sourceModules: 1, sourceModuleIds: ["lib/a.js"] },
             },
             commands: webpackCommands.directory,
           },
@@ -156,10 +156,10 @@ function metadata() {
             input: "lib/index.js",
             extensions,
             moduleCoverage: {
-              release: { graphNodes: 793, sourceModules: 793, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
-              main: { graphNodes: 793, sourceModules: 793, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
-              dpdm: { graphNodes: 838, sourceModules: 792, sourceModuleIds: ["lib/a.js"] },
-              madge: { graphNodes: 821, sourceModules: 792, sourceModuleIds: ["lib/a.js"] },
+              release: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              main: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              dpdm: { graphNodes: 3, sourceModules: 1, sourceModuleIds: ["lib/a.js"] },
+              madge: { graphNodes: 2, sourceModules: 1, sourceModuleIds: ["lib/a.js"] },
             },
             commands: webpackCommands.entrypoint,
           },
@@ -236,28 +236,28 @@ test("generates stable and development benchmark reports", async () => {
     expect(release.revision).toMatchObject({ key: "release", source: "npm", version: "0.3.0" });
     expect(release.corpora.hono.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 500,
-      graphNodes: 301,
-      sourceModules: 300,
-      meanMsPerSourceModule: 500 / 300,
+      graphNodes: 3,
+      sourceModules: 2,
+      meanMsPerSourceModule: 500 / 2,
       sourceOnlyVsOxdg: [],
       sourceMissingVsOxdg: [],
     });
     expect(release.corpora.hono.workloads.directory.results.dpdm).toMatchObject({
-      graphNodes: 310,
-      sourceModules: 299,
-      meanMsPerSourceModule: 1000 / 299,
+      graphNodes: 3,
+      sourceModules: 1,
+      meanMsPerSourceModule: 1000,
       sourceMissingVsOxdg: ["b.ts"],
     });
     expect(release.corpora.hono.workloads.directory.results.madge).toMatchObject({
-      graphNodes: 305,
-      sourceModules: 301,
+      graphNodes: 4,
+      sourceModules: 3,
       sourceOnlyVsOxdg: ["c.ts"],
     });
     expect(release.corpora.webpack.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 1000,
-      graphNodes: 817,
-      sourceModules: 817,
-      meanMsPerSourceModule: 1000 / 817,
+      graphNodes: 2,
+      sourceModules: 2,
+      meanMsPerSourceModule: 500,
     });
     expect(release.corpora.webpack.workloads.directory.results.dpdm).toMatchObject({
       sourceMissingVsOxdg: ["hot/emitter-event-target.js"],
@@ -274,15 +274,15 @@ test("generates stable and development benchmark reports", async () => {
     });
     expect(main.corpora.hono.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 250,
-      graphNodes: 306,
-      sourceModules: 300,
-      meanMsPerSourceModule: 250 / 300,
+      graphNodes: 4,
+      sourceModules: 2,
+      meanMsPerSourceModule: 125,
     });
     expect(main.corpora.webpack.workloads.directory.results.oxdg).toMatchObject({
       meanMs: 500,
-      graphNodes: 817,
-      sourceModules: 817,
-      meanMsPerSourceModule: 500 / 817,
+      graphNodes: 2,
+      sourceModules: 2,
+      meanMsPerSourceModule: 250,
     });
 
     expect(combined.schemaVersion).toBe(3);
