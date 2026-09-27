@@ -69,10 +69,17 @@ test("records released and main revisions against both benchmark corpora", async
       ["dpdm", "4.3.0"],
     ] as const) {
       await mkdir(join(workspace, "consumers", tool, "node_modules", tool), { recursive: true });
+      const packageDirectory = join(workspace, "consumers", tool, "node_modules", tool);
       await writeFile(
-        join(workspace, "consumers", tool, "node_modules", tool, "package.json"),
+        join(packageDirectory, "package.json"),
         JSON.stringify({ name: tool, version }),
       );
+      if (tool === "madge") {
+        await writeFile(
+          join(packageDirectory, "index.js"),
+          'module.exports = async () => ({ obj: () => ({ "a.js": [], "b.js": [] }) });\n',
+        );
+      }
       const binDirectory = join(workspace, "consumers", tool, "node_modules", ".bin");
       await mkdir(binDirectory, { recursive: true });
       if (tool === "madge") {
