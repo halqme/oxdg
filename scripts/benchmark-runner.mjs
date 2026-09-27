@@ -92,13 +92,25 @@ async function probeGraphModules({ cwd, directoryInput, entrypointInput, label }
   }
 
   async function probeMadge(input, probeLabel) {
-    const result = await execJson(
-      madgeCli,
-      ["--json", "--extensions", extensionList, input],
-      cwd,
-      probeLabel,
-    );
-    return countObjectKeys(result, probeLabel);
+    const script =
+      'const madge = require(process.argv[1]); madge(process.argv[2], { fileExtensions: process.argv[3].split(",") }).then((result) => process.stdout.write(String(Object.keys(result.obj()).length))).catch((error) => { console.error(error); process.exitCode = 1; });';
+    try {
+      const { stdout } = await execFile(
+        process.execPath,
+        ["-e", script, madgePackageDirectory, input, extensionList],
+        { cwd, maxBuffer: 1024 * 1024 },
+      );
+      const count = Number(stdout.trim());
+      if (!Number.isInteger(count) || count < 0) {
+        throw new Error(`${probeLabel} probe returned an invalid module count`);
+      }
+      return count;
+    } catch (error) {
+      const detail = [error.stdout, error.stderr].filter(Boolean).join("\n");
+      throw new Error(`${probeLabel} probe failed${detail ? `:\n${detail}` : ""}`, {
+        cause: error,
+      });
+    }
   }
 
   async function probeDpdm(input, probeLabel) {
@@ -230,6 +242,7 @@ const releaseCli = join(workspace, "consumers", "release", "node_modules", ".bin
 const mainCli = join(workspace, "consumers", "main", "node_modules", ".bin", "oxdg");
 const dpdmCli = join(workspace, "consumers", "dpdm", "node_modules", ".bin", "dpdm");
 const madgeCli = join(workspace, "consumers", "madge", "node_modules", ".bin", "madge");
+const madgePackageDirectory = join(workspace, "consumers", "madge", "node_modules", "madge");
 const env = {
   ...process.env,
   OXDG_RELEASE_CLI: releaseCli,
