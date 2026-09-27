@@ -108,8 +108,19 @@ function metadata() {
         repository: "https://github.com/honojs/hono.git",
         commit: "098e11912ab244c5c33931de007f04dc8e3c2929",
         workloads: {
-          directory: { input: "src", extensions, files: 311, commands: honoCommands.directory },
-          entrypoint: { input: "src/index.ts", extensions, commands: honoCommands.entrypoint },
+          directory: {
+            input: "src",
+            extensions,
+            files: 311,
+            graphModules: { release: 300, main: 305, dpdm: 290, madge: 280 },
+            commands: honoCommands.directory,
+          },
+          entrypoint: {
+            input: "src/index.ts",
+            extensions,
+            graphModules: { release: 100, main: 102, dpdm: 98, madge: 96 },
+            commands: honoCommands.entrypoint,
+          },
         },
       },
       webpack: {
@@ -118,8 +129,19 @@ function metadata() {
         repository: "https://github.com/webpack/webpack.git",
         commit: "e9e02fb312a904c04e151ebd08aaa03364a31513",
         workloads: {
-          directory: { input: "lib", extensions, files: 776, commands: webpackCommands.directory },
-          entrypoint: { input: "lib/index.js", extensions, commands: webpackCommands.entrypoint },
+          directory: {
+            input: "lib",
+            extensions,
+            files: 776,
+            graphModules: { release: 760, main: 765, dpdm: 750, madge: 740 },
+            commands: webpackCommands.directory,
+          },
+          entrypoint: {
+            input: "lib/index.js",
+            extensions,
+            graphModules: { release: 730, main: 735, dpdm: 720, madge: 710 },
+            commands: webpackCommands.entrypoint,
+          },
         },
       },
     },
@@ -191,8 +213,20 @@ test("generates stable and development benchmark reports", async () => {
     const combined = JSON.parse(await readFile(join(output, "latest.json"), "utf8"));
 
     expect(release.revision).toMatchObject({ key: "release", source: "npm", version: "0.3.0" });
-    expect(release.corpora.hono.workloads.directory.results.oxdg.meanMs).toBe(500);
-    expect(release.corpora.webpack.workloads.directory.results.oxdg.meanMs).toBe(1000);
+    expect(release.corpora.hono.workloads.directory.results.oxdg).toMatchObject({
+      meanMs: 500,
+      graphModules: 300,
+      meanMsPerModule: 500 / 300,
+    });
+    expect(release.corpora.hono.workloads.directory.results.dpdm).toMatchObject({
+      graphModules: 290,
+      meanMsPerModule: 1000 / 290,
+    });
+    expect(release.corpora.webpack.workloads.directory.results.oxdg).toMatchObject({
+      meanMs: 1000,
+      graphModules: 760,
+      meanMsPerModule: 1000 / 760,
+    });
     expect(release.corpora.hono.workloads.directory.relativePerformance.madge).toMatchObject({
       ratioToOxdg: 4,
       label: "4.00× slower",
@@ -203,8 +237,16 @@ test("generates stable and development benchmark reports", async () => {
       source: "git",
       gitCommit: "abcdef1234567890abcdef1234567890abcdef12",
     });
-    expect(main.corpora.hono.workloads.directory.results.oxdg.meanMs).toBe(250);
-    expect(main.corpora.webpack.workloads.directory.results.oxdg.meanMs).toBe(500);
+    expect(main.corpora.hono.workloads.directory.results.oxdg).toMatchObject({
+      meanMs: 250,
+      graphModules: 305,
+      meanMsPerModule: 250 / 305,
+    });
+    expect(main.corpora.webpack.workloads.directory.results.oxdg).toMatchObject({
+      meanMs: 500,
+      graphModules: 765,
+      meanMsPerModule: 500 / 765,
+    });
 
     expect(combined.schemaVersion).toBe(2);
     expect(combined.sinceRelease.hono.directory).toMatchObject({
@@ -216,6 +258,9 @@ test("generates stable and development benchmark reports", async () => {
 
     const summary = await readFile(join(output, "summary.md"), "utf8");
     expect(summary).toContain("Released — oxdg v0.3.0");
+    expect(summary).toContain("Directory-wide throughput");
+    expect(summary).toContain("Graph modules");
+    expect(summary).toContain("ms / module");
     expect(summary).toContain("Development — main @ abcdef123456");
     expect(summary).toContain("Since latest release");
     expect(summary).toContain("-50.0%");
@@ -233,6 +278,10 @@ test("generates stable and development benchmark reports", async () => {
 
     const page = await readFile(join(output, "index.html"), "utf8");
     expect(page).toContain("Released v0.3.0");
+    expect(page).toContain("Directory-wide cost per graph module");
+    expect(page).toContain("311 source files in corpus");
+    expect(page).toContain("Graph modules");
+    expect(page).toContain("ms / module");
     expect(page).toContain("Development main");
     expect(page).toContain("Since latest release");
     expect(page).toContain("release.json");

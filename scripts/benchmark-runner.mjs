@@ -54,6 +54,112 @@ async function readPackageVersion(path) {
   return packageJson.version;
 }
 
+async function execJson(command, args, cwd, label) {
+  try {
+    const { stdout } = await execFile(command, args, {
+      cwd,
+      maxBuffer: 20 * 1024 * 1024,
+    });
+    return JSON.parse(stdout);
+  } catch (error) {
+    const detail = [error.stdout, error.stderr].filter(Boolean).join("\n");
+    throw new Error(`${label} probe failed${detail ? `:\n${detail}` : ""}`, { cause: error });
+  }
+}
+
+function countObjectKeys(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${label} probe did not return an object graph`);
+  }
+  return Object.keys(value).length;
+}
+
+async function probeGraphModules({ cwd, directoryInput, entrypointInput, label }) {
+  const extensionList = extensions.join(",");
+  const dpdmOutput = join(outputDirectory, `benchmark-${label}-dpdm-probe.json`);
+
+  async function probeOxdg(cli, input, probeLabel) {
+    const result = await execJson(
+      cli,
+      ["--extensions", extensionList, input, "--json"],
+      cwd,
+      probeLabel,
+    );
+    if (!Array.isArray(result?.modules)) {
+      throw new Error(`${probeLabel} probe is missing modules`);
+    }
+    return result.modules.length;
+  }
+
+  async function probeMadge(input, probeLabel) {
+    const script =
+      'const madge = require(process.argv[1]); madge(process.argv[2], { fileExtensions: process.argv[3].split(",") }).then((result) => process.stdout.write(String(Object.keys(result.obj()).length))).catch((error) => { console.error(error); process.exitCode = 1; });';
+    try {
+      const { stdout } = await execFile(
+        process.execPath,
+        ["-e", script, madgePackageDirectory, input, extensionList],
+        { cwd, maxBuffer: 1024 * 1024 },
+      );
+      const count = Number(stdout.trim());
+      if (!Number.isInteger(count) || count < 0) {
+        throw new Error(`${probeLabel} probe returned an invalid module count`);
+      }
+      return count;
+    } catch (error) {
+      const detail = [error.stdout, error.stderr].filter(Boolean).join("\n");
+      throw new Error(`${probeLabel} probe failed${detail ? `:\n${detail}` : ""}`, {
+        cause: error,
+      });
+    }
+  }
+
+  async function probeDpdm(input, probeLabel) {
+    await rm(dpdmOutput, { force: true });
+    try {
+      await execFile(
+        dpdmCli,
+        [
+          "--extensions",
+          extensionList,
+          input,
+          "--output",
+          dpdmOutput,
+          "--no-tree",
+          "--no-circular",
+          "--no-warning",
+        ],
+        { cwd, maxBuffer: 20 * 1024 * 1024 },
+      );
+      const result = JSON.parse(await readFile(dpdmOutput, "utf8"));
+      if (!result?.tree || typeof result.tree !== "object" || Array.isArray(result.tree)) {
+        throw new Error(`${probeLabel} probe is missing tree`);
+      }
+      return Object.values(result.tree).filter((dependencies) => dependencies !== null).length;
+    } finally {
+      await rm(dpdmOutput, { force: true });
+    }
+  }
+
+  async function probeWorkload(input, dpdmInput, workloadLabel) {
+    const [release, main, dpdm, madge] = await Promise.all([
+      probeOxdg(releaseCli, input, `${workloadLabel} released oxdg`),
+      probeOxdg(mainCli, input, `${workloadLabel} main oxdg`),
+      probeDpdm(dpdmInput, `${workloadLabel} dpdm`),
+      probeMadge(input, `${workloadLabel} Madge`),
+    ]);
+    return { release, main, dpdm, madge };
+  }
+
+  return {
+    directory: await probeWorkload(
+      directoryInput,
+      `${directoryInput}/**/*.{${extensionList}}`,
+      `${label} directory`,
+    ),
+    entrypoint: await probeWorkload(entrypointInput, entrypointInput, `${label} entrypoint`),
+  };
+}
+
 async function runHyperfine({ commands, output, cwd, env }) {
   const args = [
     "--warmup",
@@ -136,6 +242,7 @@ const releaseCli = join(workspace, "consumers", "release", "node_modules", ".bin
 const mainCli = join(workspace, "consumers", "main", "node_modules", ".bin", "oxdg");
 const dpdmCli = join(workspace, "consumers", "dpdm", "node_modules", ".bin", "dpdm");
 const madgeCli = join(workspace, "consumers", "madge", "node_modules", ".bin", "madge");
+const madgePackageDirectory = join(workspace, "consumers", "madge", "node_modules", "madge");
 const env = {
   ...process.env,
   OXDG_RELEASE_CLI: releaseCli,
@@ -194,6 +301,13 @@ for (const definition of corpusDefinitions) {
     env,
   });
 
+  const graphModules = await probeGraphModules({
+    cwd: definition.directory,
+    directoryInput: definition.directoryInput,
+    entrypointInput: definition.entrypointInput,
+    label: definition.key,
+  });
+
   const commit = readCommand("git", ["-C", definition.directory, "rev-parse", "HEAD"]);
   if (definition.expectedCommit && commit !== definition.expectedCommit) {
     throw new Error(
@@ -211,12 +325,14 @@ for (const definition of corpusDefinitions) {
         input: definition.directoryInput,
         extensions,
         files: sourceFileCount,
+        graphModules: graphModules.directory,
         commands: commands.directory,
         workingDirectory: definition.directory,
       },
       entrypoint: {
         input: definition.entrypointInput,
         extensions,
+        graphModules: graphModules.entrypoint,
         commands: commands.entrypoint,
         workingDirectory: definition.directory,
       },
@@ -225,6 +341,9 @@ for (const definition of corpusDefinitions) {
   commandArtifact[definition.key] = commands;
   console.log(
     `Benchmarked ${sourceFileCount} files in ${definition.name} ${definition.directoryInput} at ${commit}`,
+  );
+  console.log(
+    `Graph modules (${definition.key}): directory ${JSON.stringify(graphModules.directory)}, entrypoint ${JSON.stringify(graphModules.entrypoint)}`,
   );
 }
 

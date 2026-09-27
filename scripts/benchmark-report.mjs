@@ -29,6 +29,10 @@ function formatDuration(milliseconds) {
   return `${milliseconds.toFixed(1)} ms`;
 }
 
+function formatModuleCost(milliseconds) {
+  return `${milliseconds.toFixed(2)} ms`;
+}
+
 function formatBytes(bytes) {
   const units = ["B", "KiB", "MiB", "GiB"];
   let value = bytes;
@@ -106,6 +110,22 @@ function revisionWorkload(rawResults, workload, revisionKey) {
       return [tool, { ratioToOxdg: ratio, label: formatRelative(ratio) }];
     }),
   );
+  const graphModules = {
+    oxdg: workload.graphModules?.[revisionKey],
+    dpdm: workload.graphModules?.dpdm,
+    madge: workload.graphModules?.madge,
+  };
+  for (const [tool, count] of Object.entries(graphModules)) {
+    if (!Number.isInteger(count) || count < 1) {
+      throw new Error(`benchmark metadata is missing a positive graph module count for ${tool}`);
+    }
+  }
+
+  const resultWithModuleCost = (resultKey, moduleKey = resultKey) => ({
+    ...rawResults[resultKey],
+    graphModules: graphModules[moduleKey],
+    meanMsPerModule: rawResults[resultKey].meanMs / graphModules[moduleKey],
+  });
 
   return {
     input: workload.input,
@@ -117,9 +137,9 @@ function revisionWorkload(rawResults, workload, revisionKey) {
       madge: workload.commands.madge,
     },
     results: {
-      oxdg,
-      dpdm: rawResults.dpdm,
-      madge: rawResults.madge,
+      oxdg: resultWithModuleCost(revisionKey, "oxdg"),
+      dpdm: resultWithModuleCost("dpdm"),
+      madge: resultWithModuleCost("madge"),
     },
     relativePerformance,
   };
@@ -205,13 +225,29 @@ function comparisonReport(release, main) {
 
 function workloadTableMarkdown(workload) {
   return [
-    "| Tool | Mean | Stddev | Median | Min | Max | Relative |",
-    "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    "| Tool | Graph modules | Mean | ms / module | Stddev | Median | Min | Max | Relative |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ...["oxdg", ...competitorOrder].map((tool) => {
       const result = workload.results[tool];
       const relative = tool === "oxdg" ? "1.00×" : workload.relativePerformance[tool].label;
       const label = tool === "oxdg" ? "oxdg" : competitorLabels[tool];
-      return `| ${label} | ${formatDuration(result.meanMs)} | ${formatDuration(result.stddevMs)} | ${formatDuration(result.medianMs)} | ${formatDuration(result.minMs)} | ${formatDuration(result.maxMs)} | ${relative} |`;
+      return `| ${label} | ${result.graphModules} | ${formatDuration(result.meanMs)} | ${formatModuleCost(result.meanMsPerModule)} | ${formatDuration(result.stddevMs)} | ${formatDuration(result.medianMs)} | ${formatDuration(result.minMs)} | ${formatDuration(result.maxMs)} | ${relative} |`;
+    }),
+  ];
+}
+
+function headlineTableMarkdown(corpus) {
+  const workload = corpus.workloads.directory;
+  return [
+    `Corpus: ${workload.files} source files`,
+    "",
+    "| Tool | Graph modules | Mean | ms / module | Relative |",
+    "| --- | ---: | ---: | ---: | ---: |",
+    ...["oxdg", ...competitorOrder].map((tool) => {
+      const result = workload.results[tool];
+      const relative = tool === "oxdg" ? "1.00×" : workload.relativePerformance[tool].label;
+      const label = tool === "oxdg" ? "oxdg" : competitorLabels[tool];
+      return `| ${label} | ${result.graphModules} | ${formatDuration(result.meanMs)} | ${formatModuleCost(result.meanMsPerModule)} | ${relative} |`;
     }),
   ];
 }
@@ -224,7 +260,16 @@ function makeMarkdown(release, main, comparison) {
     "",
     `## Released — oxdg v${release.revision.version}`,
     "",
+    "## Directory-wide throughput",
+    "",
+    "Graph module counts are collected separately from the timed runs. ms / module is the mean CLI runtime divided by graph modules.",
+    "",
   ];
+
+  for (const key of corpusOrder) {
+    const corpus = release.corpora[key];
+    lines.push(`### ${corpus.name} — ${corpus.profile}`, "", ...headlineTableMarkdown(corpus), "");
+  }
 
   for (const key of corpusOrder) {
     const corpus = release.corpora[key];
@@ -295,7 +340,9 @@ function revisionSection(report, id, eyebrow) {
         const relative = tool === "oxdg" ? "baseline" : workload.relativePerformance[tool].label;
         return `<tr class="${tool === "oxdg" ? "primary-row" : ""}">
           <th scope="row">${escapeHtml(label)}</th>
+          <td>${result.graphModules}</td>
           <td>${formatDuration(result.meanMs)}</td>
+          <td>${formatModuleCost(result.meanMsPerModule)}</td>
           <td>± ${formatDuration(result.stddevMs)}</td>
           <td>${formatDuration(result.medianMs)}</td>
           <td>${formatDuration(result.minMs)}</td>
@@ -305,7 +352,7 @@ function revisionSection(report, id, eyebrow) {
       })
       .join("");
     return `<div class="table-wrap"><table>
-      <thead><tr><th>Tool</th><th>Mean</th><th>Stddev</th><th>Median</th><th>Min</th><th>Max</th><th>Relative</th></tr></thead>
+      <thead><tr><th>Tool</th><th>Graph modules</th><th>Mean</th><th>ms / module</th><th>Stddev</th><th>Median</th><th>Min</th><th>Max</th><th>Relative</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
   };
@@ -327,6 +374,36 @@ function revisionSection(report, id, eyebrow) {
       })
       .join("")}
   </section>`;
+}
+
+function headlineThroughputHtml(report) {
+  return corpusOrder
+    .map((key) => {
+      const corpus = report.corpora[key];
+      const workload = corpus.workloads.directory;
+      const rows = ["oxdg", ...competitorOrder]
+        .map((tool) => {
+          const result = workload.results[tool];
+          const label = tool === "oxdg" ? "oxdg" : competitorLabels[tool];
+          const relative = tool === "oxdg" ? "baseline" : workload.relativePerformance[tool].label;
+          return `<tr class="${tool === "oxdg" ? "primary-row" : ""}">
+            <th scope="row">${escapeHtml(label)}</th>
+            <td>${result.graphModules}</td>
+            <td>${formatDuration(result.meanMs)}</td>
+            <td>${formatModuleCost(result.meanMsPerModule)}</td>
+            <td>${escapeHtml(relative)}</td>
+          </tr>`;
+        })
+        .join("");
+      return `<article class="panel throughput-panel">
+        <div class="throughput-heading"><div><p class="eyebrow">${escapeHtml(corpus.profile)}</p><h3>${escapeHtml(corpus.name)}</h3></div><span>${workload.files} source files in corpus</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tool</th><th>Graph modules</th><th>Mean</th><th>ms / module</th><th>Relative</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </article>`;
+    })
+    .join("");
 }
 
 function makeHtml(release, main, comparison, generatedAt) {
@@ -356,7 +433,7 @@ function makeHtml(release, main, comparison, generatedAt) {
 .hero h1{margin:0;font-size:clamp(2rem,5vw,3.4rem);line-height:1.05;letter-spacing:-.04em}.hero>p{max-width:780px;color:var(--muted);font-size:1.05rem}.eyebrow{margin:0;color:var(--accent)!important;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .revision-nav{display:flex;gap:.6rem;margin:1.4rem 0 2rem}.revision-nav a{text-decoration:none;padding:.55rem .8rem;border:1px solid var(--border);border-radius:.55rem;background:var(--surface)}
 .overview,.delta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;margin:1.4rem 0}.overview-card,.delta-card,.panel{background:var(--surface);border:1px solid var(--border);border-radius:.9rem}.overview-card,.delta-card{padding:1rem}.overview-card span,.delta-card span,.delta-card small{display:block;color:var(--muted)}.overview-card strong,.delta-card strong{display:block;font-size:1.5rem;margin:.15rem 0}
-.revision{margin-top:3rem}.revision-heading{margin-bottom:1rem}.revision-heading h2{margin:.15rem 0;font-size:2rem}.revision-heading p{color:var(--muted)}
+.throughput{margin-top:2.5rem}.throughput h2{margin:.15rem 0}.section-copy{max-width:850px;color:var(--muted)}.throughput-panel{margin:.8rem 0}.throughput-heading{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:.8rem}.throughput-heading h3{margin:.1rem 0;font-size:1.25rem}.throughput-heading span{color:var(--muted);font-size:.9rem}.revision{margin-top:3rem}.revision-heading{margin-bottom:1rem}.revision-heading h2{margin:.15rem 0;font-size:2rem}.revision-heading p{color:var(--muted)}
 .panel{margin:1rem 0;padding:1.25rem}.corpus-heading{display:flex;justify-content:space-between;gap:2rem;align-items:flex-start;padding-bottom:1rem;border-bottom:1px solid var(--border)}.corpus-heading h3{margin:.05rem 0 .25rem;font-size:1.35rem}.corpus-heading p{margin:0;color:var(--muted)}
 .corpus-stats{display:flex;gap:1rem}.corpus-stats div{text-align:right}.corpus-stats span{display:block;color:var(--muted);font-size:.8rem}.corpus-stats strong{font-size:1.2rem}.workload{padding-top:1rem}.workload h4{margin:.2rem 0 .7rem}
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:.65rem}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;white-space:nowrap}th,td{padding:.65rem .75rem;border-bottom:1px solid var(--border);text-align:right}th:first-child,td:first-child{text-align:left}thead th{background:var(--soft);color:var(--muted);font-size:.8rem}tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}.primary-row{background:var(--accent-soft)}.primary-row th{color:var(--accent)}
@@ -375,6 +452,10 @@ details.panel summary{cursor:pointer;font-weight:650}footer{margin-top:1.5rem;co
 <div class="overview-card"><span>Development</span><strong>${escapeHtml(main.revision.gitCommit.slice(0, 12))}</strong><small>main commit · same runner</small></div>
 </section>
 
+<section class="throughput"><p class="eyebrow">Stable throughput</p><h2>Directory-wide cost per graph module</h2>
+<p class="section-copy">Module counts come from separate untimed JSON probes. ms / module amortizes CLI startup, discovery, resolution, parsing, and graph construction over modules present in each tool's output graph.</p>
+${headlineThroughputHtml(release)}</section>
+
 <section><p class="eyebrow">Development vs released</p><h2>Since latest release</h2><div class="delta-grid">${sinceCards}</div></section>
 
 ${revisionSection(release, "released", "Stable")}
@@ -387,7 +468,7 @@ ${revisionSection(main, "development", "Development")}
 </div></section>
 
 <details class="panel"><summary>Methodology and environment</summary>
-<p>Released oxdg, main oxdg, dpdm, and Madge are executed in the same hyperfine runs against pinned Hono and Webpack corpora.</p>
+<p>Released oxdg, main oxdg, dpdm, and Madge are executed in the same hyperfine runs against pinned Hono and Webpack corpora. Graph module counts are collected in separate untimed JSON probes after timing. ms / module is mean CLI runtime divided by graph modules and is not parser-only time.</p>
 <p>Runner: ${escapeHtml(release.environment.runner.label)} · CPU: ${escapeHtml(cpuDetails(release.environment.host.cpu))} · Node ${escapeHtml(release.environment.runtimes.node.actual)} · ${release.benchmark.warmup} warmups / ${release.benchmark.runs} measured runs.</p>
 <p>Generated ${escapeHtml(generatedAt)}.</p></details>
 <footer><a href="release.json">Released JSON</a> · <a href="main.json">Main JSON</a> · <a href="latest.json">Combined JSON</a></footer>

@@ -40,7 +40,10 @@ async function writeOxdgConsumer(workspace: string, key: string, version: string
     JSON.stringify({ name: "oxdg", version }),
   );
   await writeFile(join(packageDirectory, "dist", "cli", "main.js"), "#!/usr/bin/env node\n");
-  await writeExecutable(join(binDirectory, "oxdg"), "process.exit(0);\n");
+  await writeExecutable(
+    join(binDirectory, "oxdg"),
+    'console.log(JSON.stringify({ modules: [{ id: "a" }, { id: "b" }] }));\n',
+  );
 }
 
 test("records released and main revisions against both benchmark corpora", async () => {
@@ -66,13 +69,30 @@ test("records released and main revisions against both benchmark corpora", async
       ["dpdm", "4.3.0"],
     ] as const) {
       await mkdir(join(workspace, "consumers", tool, "node_modules", tool), { recursive: true });
+      const packageDirectory = join(workspace, "consumers", tool, "node_modules", tool);
       await writeFile(
-        join(workspace, "consumers", tool, "node_modules", tool, "package.json"),
+        join(packageDirectory, "package.json"),
         JSON.stringify({ name: tool, version }),
       );
+      if (tool === "madge") {
+        await writeFile(
+          join(packageDirectory, "index.js"),
+          'module.exports = async () => ({ obj: () => ({ "a.js": [], "b.js": [] }) });\n',
+        );
+      }
       const binDirectory = join(workspace, "consumers", tool, "node_modules", ".bin");
       await mkdir(binDirectory, { recursive: true });
-      await writeExecutable(join(binDirectory, tool), "process.exit(0);\n");
+      if (tool === "madge") {
+        await writeExecutable(
+          join(binDirectory, tool),
+          'console.log(JSON.stringify({ "a.js": [], "b.js": [] }));\n',
+        );
+      } else {
+        await writeExecutable(
+          join(binDirectory, tool),
+          'const fs = require("node:fs"); const args = process.argv.slice(2); const output = args[args.indexOf("--output") + 1]; fs.writeFileSync(output, JSON.stringify({ tree: { "a.js": [], "b.js": [], "ignored.js": null } }));\n',
+        );
+      }
     }
 
     await writeFile(join(hono, "src", "index.ts"), "export {};\n");
@@ -174,6 +194,30 @@ test("records released and main revisions against both benchmark corpora", async
 
     expect(metadata.corpora.hono.workloads.directory.files).toBe(3);
     expect(metadata.corpora.webpack.workloads.directory.files).toBe(2);
+    expect(metadata.corpora.hono.workloads.directory.graphModules).toEqual({
+      release: 2,
+      main: 2,
+      dpdm: 2,
+      madge: 2,
+    });
+    expect(metadata.corpora.hono.workloads.entrypoint.graphModules).toEqual({
+      release: 2,
+      main: 2,
+      dpdm: 2,
+      madge: 2,
+    });
+    expect(metadata.corpora.webpack.workloads.directory.graphModules).toEqual({
+      release: 2,
+      main: 2,
+      dpdm: 2,
+      madge: 2,
+    });
+    expect(metadata.corpora.webpack.workloads.entrypoint.graphModules).toEqual({
+      release: 2,
+      main: 2,
+      dpdm: 2,
+      madge: 2,
+    });
     expect(metadata.corpora.hono.workloads.directory.commands).toEqual({
       release: '"$OXDG_RELEASE_CLI" --extensions js,jsx,ts,tsx,mjs,cjs,mts,cts src',
       main: '"$OXDG_MAIN_CLI" --extensions js,jsx,ts,tsx,mjs,cjs,mts,cts src',
