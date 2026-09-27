@@ -133,7 +133,8 @@ function revisionWorkload(rawResults, workload, revisionKey) {
       !Number.isInteger(coverage.graphNodes) ||
       !Number.isInteger(coverage.sourceModules) ||
       !Array.isArray(coverage.sourceModuleIds) ||
-      coverage.sourceModules < 1
+      coverage.sourceModules < 1 ||
+      coverage.sourceModules !== coverage.sourceModuleIds.length
     ) {
       throw new Error(`benchmark metadata is missing module coverage for ${coverageKey}`);
     }
