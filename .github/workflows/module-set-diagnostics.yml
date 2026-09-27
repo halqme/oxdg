@@ -110,7 +110,7 @@ jobs:
             const temp = await mkdtemp(join(process.env.RUNNER_TEMP, "dpdm-set-"));
             const output = join(temp, "graph.json");
             try {
-              await exec(dpdmCli, ["--extensions", extensions.join(","), input, "--output", output, "--no-tree", "--no-circular", "--no-warning"], { cwd, maxBuffer: 50 * 1024 * 1024 });
+              await exec(dpdmCli, ["--extensions", extensions.map((x) => "." + x).join(","), input, "--output", output, "--no-tree", "--no-circular", "--no-warning"], { cwd, maxBuffer: 50 * 1024 * 1024 });
               const json = JSON.parse(await readFile(output, "utf8"));
               return new Set(Object.entries(json.tree).filter(([, deps]) => deps !== null).map(([p]) => norm(cwd, p)));
             } finally {
