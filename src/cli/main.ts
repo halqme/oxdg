@@ -2,7 +2,6 @@
 
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { analyze } from "../analyzer/analyze.ts";
 import { findCycles } from "../graph/cycles.ts";
 import { cyclicSubgraph } from "../graph/filter.ts";
 import { findDirectDependents, findLeaves, findOrphans } from "../graph/queries.ts";
@@ -85,6 +84,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
       analysisOptions.exclude = cliOptions.exclude;
     }
 
+    const { analyze } = await import("../analyzer/analyze.ts");
     const result = await analyze(cliOptions.paths, analysisOptions);
     printWarnings(result.warnings);
     const cycles = cliOptions.circular || cliOptions.failOnCircular ? findCycles(result.graph) : [];
