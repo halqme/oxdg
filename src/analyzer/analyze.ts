@@ -33,9 +33,15 @@ function moduleId(canonicalRoot: string, filePath: string): string {
   return relativePath.startsWith("./") ? relativePath.slice(2) : relativePath;
 }
 
-async function canonicalPath(filePath: string): Promise<string> {
+async function canonicalPath(filePath: string, cache: Map<string, string>): Promise<string> {
+  const cached = cache.get(filePath);
+  if (cached !== undefined) {
+    return cached;
+  }
   try {
-    return await realpath(filePath);
+    const canonical = await realpath(filePath);
+    cache.set(filePath, canonical);
+    return canonical;
   } catch {
     return filePath;
   }
@@ -108,6 +114,7 @@ export async function analyze(
   const queue = [...files];
   const pending = new Set(files);
   const analyzed = new Set<string>();
+  const canonicalPaths = new Map<string, string>();
 
   while (queue.length > 0) {
     const filePath = queue.shift();
@@ -139,7 +146,7 @@ export async function analyze(
       const resolution = resolver.resolve(reference.specifier, filePath, reference.kind);
       let edge: DependencyEdge;
       if (resolution.status === "internal") {
-        const targetPath = await canonicalPath(resolve(resolution.absolutePath));
+        const targetPath = await canonicalPath(resolve(resolution.absolutePath), canonicalPaths);
         if (isExcluded(targetPath)) {
           continue;
         }
