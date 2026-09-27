@@ -111,11 +111,11 @@ async function probeModuleCoverage({ cwd, directoryInput, entrypointInput, label
 
   async function probeMadge(input, probeLabel) {
     const script =
-      'const madge = require(process.argv[1]); madge(process.argv[2], { fileExtensions: process.argv[3].split(",") }).then((result) => process.stdout.write(JSON.stringify(Object.keys(result.obj())))).catch((error) => { console.error(error); process.exitCode = 1; });';
+      'const path = require("node:path"); const madge = require(process.argv[1]); const cwd = process.argv[2]; const input = path.resolve(cwd, process.argv[3]); madge(input, { baseDir: cwd, fileExtensions: process.argv[4].split(",") }).then((result) => process.stdout.write(JSON.stringify(Object.keys(result.obj())))).catch((error) => { console.error(error); process.exitCode = 1; });';
     try {
       const { stdout } = await execFile(
         process.execPath,
-        ["-e", script, madgePackageDirectory, input, extensionList],
+        ["-e", script, madgePackageDirectory, cwd, input, extensionList],
         { cwd, maxBuffer: 20 * 1024 * 1024 },
       );
       const ids = JSON.parse(stdout);
