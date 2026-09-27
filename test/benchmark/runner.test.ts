@@ -42,7 +42,7 @@ async function writeOxdgConsumer(workspace: string, key: string, version: string
   await writeFile(join(packageDirectory, "dist", "cli", "main.js"), "#!/usr/bin/env node\n");
   await writeExecutable(
     join(binDirectory, "oxdg"),
-    'console.log(JSON.stringify({ modules: [{ id: "a" }, { id: "b" }] }));\n',
+    'console.log(JSON.stringify({ modules: [{ id: "a.js" }, { id: "b.js" }] }));\n',
   );
 }
 
