@@ -121,10 +121,10 @@ function revisionWorkload(rawResults, workload, revisionKey) {
     }
   }
 
-  const resultWithModuleCost = (tool) => ({
-    ...rawResults[tool],
-    graphModules: graphModules[tool],
-    meanMsPerModule: rawResults[tool].meanMs / graphModules[tool],
+  const resultWithModuleCost = (resultKey, moduleKey = resultKey) => ({
+    ...rawResults[resultKey],
+    graphModules: graphModules[moduleKey],
+    meanMsPerModule: rawResults[resultKey].meanMs / graphModules[moduleKey],
   });
 
   return {
@@ -137,7 +137,7 @@ function revisionWorkload(rawResults, workload, revisionKey) {
       madge: workload.commands.madge,
     },
     results: {
-      oxdg: resultWithModuleCost(revisionKey),
+      oxdg: resultWithModuleCost(revisionKey, "oxdg"),
       dpdm: resultWithModuleCost("dpdm"),
       madge: resultWithModuleCost("madge"),
     },
