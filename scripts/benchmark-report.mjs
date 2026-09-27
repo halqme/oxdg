@@ -268,12 +268,7 @@ function makeMarkdown(release, main, comparison) {
 
   for (const key of corpusOrder) {
     const corpus = release.corpora[key];
-    lines.push(
-      `### ${corpus.name} — ${corpus.profile}`,
-      "",
-      ...headlineTableMarkdown(corpus),
-      "",
-    );
+    lines.push(`### ${corpus.name} — ${corpus.profile}`, "", ...headlineTableMarkdown(corpus), "");
   }
 
   for (const key of corpusOrder) {
