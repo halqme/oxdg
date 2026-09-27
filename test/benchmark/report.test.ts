@@ -145,8 +145,16 @@ function metadata() {
             extensions,
             files: 776,
             moduleCoverage: {
-              release: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
-              main: { graphNodes: 2, sourceModules: 2, sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"] },
+              release: {
+                graphNodes: 2,
+                sourceModules: 2,
+                sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"],
+              },
+              main: {
+                graphNodes: 2,
+                sourceModules: 2,
+                sourceModuleIds: ["lib/a.js", "hot/emitter-event-target.js"],
+              },
               dpdm: { graphNodes: 3, sourceModules: 1, sourceModuleIds: ["lib/a.js"] },
               madge: { graphNodes: 2, sourceModules: 1, sourceModuleIds: ["lib/a.js"] },
             },
