@@ -17,6 +17,9 @@ test("renders SVG graphs with configurable direction and edge markers", async ()
 
     expect(svg).not.toBe(renderSvg(graph));
     expect(svg).toContain("<marker");
+    expect(svg).toContain('stroke-linejoin="round"');
+    expect(svg).toContain('rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"');
+    expect(svg).toContain('text-anchor="middle"');
     expect(svg).toContain("src/a.ts");
     expect(svg).toContain('<g transform="translate(0 24)">');
   } finally {

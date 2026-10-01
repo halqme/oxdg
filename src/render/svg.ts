@@ -10,7 +10,7 @@ interface LayoutEdge {
   to: string;
 }
 
-const MIN_NODE_WIDTH = 120;
+const MIN_NODE_WIDTH = 32;
 const MAX_NODE_WIDTH = 420;
 const NODE_HEIGHT = 36;
 const GRAPH_MARGIN = 24;
@@ -31,7 +31,7 @@ function escapeXml(value: string): string {
 }
 
 function nodeWidth(label: string): number {
-  return Math.min(MAX_NODE_WIDTH, Math.max(MIN_NODE_WIDTH, label.length * 8 + 24));
+  return Math.min(MAX_NODE_WIDTH, Math.max(MIN_NODE_WIDTH, label.length * 8));
 }
 
 function edgeKey(from: string, to: string): string {
@@ -112,7 +112,7 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     const path = pathForPoints(points);
     if (path) {
       elements.push(
-        `<path d="${path}" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>`,
+        `<path d="${path}" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>`,
       );
     }
   }
@@ -126,18 +126,18 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     const x = node.x - node.width / 2;
     const y = node.y - node.height / 2;
     elements.push(
-      `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(node.width)}" height="${formatNumber(node.height)}" rx="4" fill="#ffffff" stroke="#334155"/>`,
+      `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(node.width)}" height="${formatNumber(node.height)}" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>`,
     );
     elements.push(
-      `<text x="${formatNumber(x + 12)}" y="${formatNumber(node.y)}" fill="#0f172a" font-family="sans-serif" font-size="14" dominant-baseline="middle">${escapeXml(module)}</text>`,
+      `<text x="${formatNumber(node.x)}" y="${formatNumber(node.y)}" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">${escapeXml(module)}</text>`,
     );
   }
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
     "  <defs>",
-    '    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="10" markerHeight="7" orient="auto">',
-    '      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#64748b"/>',
+    '    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">',
+    '      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>',
     "    </marker>",
     "  </defs>",
     `  <g transform="translate(0 ${SVG_TOP_PADDING})">`,
