@@ -215,7 +215,7 @@ bun run release:check
 
 `check` runs TypeScript type checking.
 
-`build` uses `tsdown` to produce the ESM distribution, declarations, and source maps.
+`build` uses Vite+'s `vp pack` command, powered by tsdown, to produce the ESM distribution, declarations, and source maps.
 
 `release:check` packs the package, validates the published contents, installs the packed artifact into a temporary project, and exercises the packaged CLI including version, circular dependency, JSON, and SVG checks.
 
