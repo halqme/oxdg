@@ -59,6 +59,29 @@ describe("source discovery", () => {
     }
   });
 
+  test("keeps repeated imports through a file symlink on the canonical module", async () => {
+    const root = await createFixture({
+      "src/entry.ts": 'import "./target.ts";\nimport "./alias.ts";\n',
+      "src/other.ts": 'import "./alias.ts";\n',
+      "src/target.ts": "export const target = true;\n",
+    });
+    await symlink("target.ts", join(root, "src/alias.ts"));
+
+    try {
+      const result = await analyze("src", { cwd: root });
+
+      expect([...result.graph.nodes.keys()]).toEqual([
+        "src/entry.ts",
+        "src/other.ts",
+        "src/target.ts",
+      ]);
+      expect(result.graph.edges.filter((edge) => edge.to === "src/target.ts")).toHaveLength(3);
+      expect(result.warnings).toEqual([]);
+    } finally {
+      await removeFixture(root);
+    }
+  });
+
   test("does not follow directory symlinks", async () => {
     const outside = await mkdtemp(join(tmpdir(), "oxdg-linked-"));
     const root = await createFixture({
