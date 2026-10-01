@@ -22,5 +22,5 @@
     "noUnusedParameters": true,
     "noPropertyAccessFromIndexSignature": true
   },
-  "include": ["src/**/*.ts", "tsdown.config.ts"]
+  "include": ["src/**/*.ts", "vite.config.ts"]
 }
