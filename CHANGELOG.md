@@ -4,12 +4,19 @@ All notable user-facing changes to oxdg are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.4.2] - 2026-10-02
+
+### Performance
+
+- Defer loading the analyzer until the CLI needs to analyze dependencies.
+- Cache canonical paths during analysis to avoid repeated filesystem lookups for repeated imports.
 
 ### Changed
 
+- Refined SVG graph layout with more compact, centered nodes and updated edge styling.
 - Benchmark reporting now distinguishes comparable JavaScript/TypeScript source-module coverage from tool-specific graph nodes.
 - dpdm benchmark commands use its documented dotted extension syntax and apply the selected extension set consistently during recursive analysis.
+- Use vite-plus for local development.
 
 ## [0.4.1] - 2026-09-26
 
@@ -78,7 +85,8 @@ The project follows [Semantic Versioning](https://semver.org/).
 - Text, JSON, Mermaid, D2, and standalone SVG output.
 - Public analysis and rendering API.
 
-[Unreleased]: https://github.com/halqme/oxdg/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/halqme/oxdg/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/halqme/oxdg/releases/tag/v0.4.2
 [0.4.1]: https://github.com/halqme/oxdg/releases/tag/v0.4.1
 [0.4.0]: https://github.com/halqme/oxdg/releases/tag/v0.4.0
 [0.3.0]: https://github.com/halqme/oxdg/releases/tag/v0.3.0
