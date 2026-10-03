@@ -6,7 +6,7 @@ import { renderJson } from "../../src/render/json.ts";
 import { renderMermaid } from "../../src/render/mermaid.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { renderText } from "../../src/render/text.ts";
-import type { ModuleGraph } from "../../src/types.ts";
+import type { ModuleGraph } from "../../src/types/graph.ts";
 import { createFixture, removeFixture, writeFixtureFiles } from "../fixtures.ts";
 
 const renderAll = (graph: ModuleGraph) => ({

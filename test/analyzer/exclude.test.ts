@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { expect, test } from "bun:test";
 import { analyze } from "../../src/analyzer/analyze.ts";
-import type { ExcludePattern } from "../../src/types.ts";
+import type { ExcludePattern } from "../../src/types/analysis.ts";
 import { createFixture, removeFixture } from "../fixtures.ts";
 
 const modules = [

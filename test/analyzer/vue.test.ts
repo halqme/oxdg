@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { analyze } from "../../src/analyzer/analyze.ts";
-import type { DependencyEdge } from "../../src/types.ts";
+import type { DependencyEdge } from "../../src/types/graph.ts";
 import { analyzeFixture, createFixture, removeFixture } from "../fixtures.ts";
 
 function expectEdge(

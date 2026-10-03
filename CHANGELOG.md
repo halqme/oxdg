@@ -9,6 +9,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 ### Maintenance
 
 - Organized shared types by analysis, graph, and rendering responsibilities.
+- Removed the unused aggregate type barrel; tests import types from their domain modules.
 
 ### Changed
 

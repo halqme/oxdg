@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { analyze } from "../../src/analyzer/analyze.ts";
 import { renderText } from "../../src/render/text.ts";
-import type { ModuleGraph } from "../../src/types.ts";
+import type { ModuleGraph } from "../../src/types/graph.ts";
 import { createFixture, removeFixture } from "../fixtures.ts";
 
 test("renders modules and internal dependencies in stable order", async () => {
