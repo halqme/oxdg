@@ -8,19 +8,53 @@ export const NODE_STYLES = {
   cyclic: { stroke: "#ef4444", text: "#b91c1c" },
 } as const;
 
+export const EDGE_COLORS = {
+  normal: "#94a3b8",
+  cyclic: "#ef4444",
+} as const;
+
 export type NodeCategory = keyof typeof NODE_STYLES;
 
-export function classifyNodes(graph: ModuleGraph): ReadonlyMap<ModuleId, NodeCategory> {
-  const cyclicModules = new Set(findCycles(graph).flatMap((cycle) => cycle.modules));
-  const leafModules = new Set(findLeaves(graph));
-  const categories = new Map<ModuleId, NodeCategory>();
+export interface GraphStyleClassification {
+  nodeCategories: ReadonlyMap<ModuleId, NodeCategory>;
+  cyclicEdges: ReadonlyMap<ModuleId, ReadonlySet<ModuleId>>;
+}
 
+export function classifyGraph(graph: ModuleGraph): GraphStyleClassification {
+  const cycles = findCycles(graph);
+  const cyclicModules = new Set(cycles.flatMap((cycle) => cycle.modules));
+  const mutableCyclicEdges = new Map<ModuleId, Set<ModuleId>>();
+
+  for (const cycle of cycles) {
+    for (let index = 0; index < cycle.modules.length; index += 1) {
+      const from = cycle.modules[index];
+      const to = cycle.modules[(index + 1) % cycle.modules.length];
+      if (from === undefined || to === undefined) {
+        continue;
+      }
+      const targets = mutableCyclicEdges.get(from) ?? new Set<ModuleId>();
+      targets.add(to);
+      mutableCyclicEdges.set(from, targets);
+    }
+  }
+
+  const leafModules = new Set(findLeaves(graph));
+  const nodeCategories = new Map<ModuleId, NodeCategory>();
   for (const module of graph.nodes.keys()) {
-    categories.set(
+    nodeCategories.set(
       module,
       cyclicModules.has(module) ? "cyclic" : leafModules.has(module) ? "leaf" : "normal",
     );
   }
 
-  return categories;
+  const cyclicEdges = new Map<ModuleId, ReadonlySet<ModuleId>>(mutableCyclicEdges);
+  return { nodeCategories, cyclicEdges };
+}
+
+export function isCycleEdge(
+  classification: GraphStyleClassification,
+  from: ModuleId,
+  to: ModuleId,
+): boolean {
+  return classification.cyclicEdges.get(from)?.has(to) ?? false;
 }

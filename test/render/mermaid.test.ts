@@ -10,6 +10,7 @@ test("renders Mermaid graphs with stable node IDs and configurable direction", a
     "src/c.ts": 'import "./a.js";\n',
     "src/leaf.ts": "export const leaf = true;\n",
     "src/normal.ts": 'import "./leaf.js";\n',
+    "src/self.ts": 'import "./self.js";\n',
   });
 
   try {
@@ -26,6 +27,9 @@ test("renders Mermaid graphs with stable node IDs and configurable direction", a
     expect(mermaid).toContain("class n0 cyclic;");
     expect(mermaid).toContain("class n3 leaf;");
     expect(mermaid).toContain("class n4 normal;");
+    expect(mermaid).toMatch(/n0 --> n1\n\s+linkStyle \d+ stroke:#ef4444;/);
+    expect(mermaid).toMatch(/n4 --> n3\n\s+linkStyle \d+ stroke:#94a3b8;/);
+    expect(mermaid).toMatch(/n5 --> n5\n\s+linkStyle \d+ stroke:#ef4444;/);
   } finally {
     await removeFixture(root);
   }

@@ -20,6 +20,7 @@ test("renders SVG graphs with configurable direction and node category colors", 
     "src/c.ts": 'import "./a.js";\n',
     "src/leaf.ts": "export const leaf = true;\n",
     "src/normal.ts": 'import "./leaf.js";\n',
+    "src/self.ts": 'import "./self.js";\n',
   });
 
   try {
@@ -29,6 +30,12 @@ test("renders SVG graphs with configurable direction and node category colors", 
     expect(svg).not.toBe(renderSvg(graph));
     expect(svg).toContain("<marker");
     expect(svg).toContain('stroke-linejoin="round"');
+    expect(svg).toContain('fill="none" stroke="#94a3b8" stroke-width="1.25"');
+    expect(svg).toContain('fill="none" stroke="#ef4444" stroke-width="1.25"');
+    expect(svg).toContain('marker-end="url(#arrow)"');
+    expect(svg).toContain('marker-end="url(#arrow-cyclic)"');
+    expect(svg.match(/marker-end="url\(#arrow\)"/g)?.length).toBe(1);
+    expect(svg.match(/marker-end="url\(#arrow-cyclic\)"/g)?.length).toBe(4);
     expect(svg).toContain('rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"');
     expect(svg).toContain('text-anchor="middle"');
     expectNodeColors(svg, "src/normal.ts", "#3b82f6", "#1d4ed8");
