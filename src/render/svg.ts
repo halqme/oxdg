@@ -1,4 +1,6 @@
 import { graphlib, layout } from "@dagrejs/dagre";
+import { findCycles } from "../graph/cycles.ts";
+import { findLeaves } from "../graph/queries.ts";
 import type { GraphDirection, ModuleGraph } from "../types.ts";
 
 export interface SvgRenderOptions {
@@ -15,6 +17,11 @@ const MAX_NODE_WIDTH = 420;
 const NODE_HEIGHT = 36;
 const GRAPH_MARGIN = 24;
 const SVG_TOP_PADDING = GRAPH_MARGIN;
+const NODE_COLORS = {
+  normal: { stroke: "#3b82f6", text: "#1d4ed8" },
+  leaf: { stroke: "#22c55e", text: "#15803d" },
+  cyclic: { stroke: "#ef4444", text: "#b91c1c" },
+} as const;
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -61,6 +68,8 @@ function pathForPoints(points: readonly { x: number; y: number }[]): string {
 export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): string {
   const direction = options.direction ?? "LR";
   const modules = [...graph.nodes.keys()].sort(compareStrings);
+  const cyclicModules = new Set(findCycles(graph).flatMap((cycle) => cycle.modules));
+  const leafModules = new Set(findLeaves(graph));
   const ids = new Map(modules.map((module, index) => [module, `n${index}`]));
   const dagreGraph = new graphlib.Graph({ directed: true });
   dagreGraph.setGraph({
@@ -125,11 +134,16 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     const node = dagreGraph.node(id);
     const x = node.x - node.width / 2;
     const y = node.y - node.height / 2;
+    const colors = cyclicModules.has(module)
+      ? NODE_COLORS.cyclic
+      : leafModules.has(module)
+        ? NODE_COLORS.leaf
+        : NODE_COLORS.normal;
     elements.push(
-      `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(node.width)}" height="${formatNumber(node.height)}" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>`,
+      `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(node.width)}" height="${formatNumber(node.height)}" rx="7" fill="#ffffff" stroke="${colors.stroke}" stroke-width="1"/>`,
     );
     elements.push(
-      `<text x="${formatNumber(node.x)}" y="${formatNumber(node.y)}" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">${escapeXml(module)}</text>`,
+      `<text x="${formatNumber(node.x)}" y="${formatNumber(node.y)}" fill="${colors.text}" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">${escapeXml(module)}</text>`,
     );
   }
 
