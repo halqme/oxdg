@@ -1,19 +1,14 @@
 import * as OxcParser from "oxc-parser";
 import { walk } from "oxc-walker";
 import { SOURCE_EXTRACTOR_PLUGINS } from "../plugin/registry.ts";
-import type { ScriptLanguage, SourceExtractor } from "../plugin/types.ts";
+import type {
+  ImportExtractionResult,
+  ImportReference,
+  ScriptLanguage,
+  SourceExtractor,
+} from "../plugin/types.ts";
 import type { AnalysisWarning, DependencyKind } from "../types.ts";
-
-export interface ImportReference {
-  specifier: string;
-  kind: DependencyKind;
-  typeOnly: boolean;
-}
-
-export interface ImportExtractionResult {
-  imports: readonly ImportReference[];
-  warnings: readonly AnalysisWarning[];
-}
+export type { ImportExtractionResult, ImportReference };
 
 interface LocatedReference {
   reference: ImportReference;
