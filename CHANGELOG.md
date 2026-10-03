@@ -1,8 +1,14 @@
 # Changelog
 
-All notable user-facing changes to oxdg are documented here.
+All notable user-facing and maintenance changes to oxdg are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Changed
+
+- Consistent color-coding for "normal", "leaf", and "cyclic" modules and edges across D2, Mermaid, and SVG renderers, making visualizations more informative and easier to interpret.
 
 ## [0.4.2] - 2026-10-02
 
