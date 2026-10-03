@@ -1,4 +1,5 @@
 import { graphlib, layout } from "@dagrejs/dagre";
+import { classifyGraph, EDGE_COLORS, isCycleEdge, NODE_STYLES } from "./node-styles.ts";
 import type { GraphDirection, ModuleGraph } from "../types.ts";
 
 export interface SvgRenderOptions {
@@ -8,6 +9,7 @@ export interface SvgRenderOptions {
 interface LayoutEdge {
   from: string;
   to: string;
+  cyclic: boolean;
 }
 
 const MIN_NODE_WIDTH = 32;
@@ -61,6 +63,8 @@ function pathForPoints(points: readonly { x: number; y: number }[]): string {
 export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): string {
   const direction = options.direction ?? "LR";
   const modules = [...graph.nodes.keys()].sort(compareStrings);
+  const graphStyles = classifyGraph(graph);
+  const nodeCategories = graphStyles.nodeCategories;
   const ids = new Map(modules.map((module, index) => [module, `n${index}`]));
   const dagreGraph = new graphlib.Graph({ directed: true });
   dagreGraph.setGraph({
@@ -96,7 +100,7 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
       continue;
     }
     seenEdges.add(key);
-    layoutEdges.push({ from, to });
+    layoutEdges.push({ from, to, cyclic: isCycleEdge(graphStyles, edge.from, edge.to) });
     dagreGraph.setEdge(from, to);
   }
 
@@ -111,8 +115,10 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     const points = dagreGraph.edge({ v: edge.from, w: edge.to }).points;
     const path = pathForPoints(points);
     if (path) {
+      const stroke = edge.cyclic ? EDGE_COLORS.cyclic : EDGE_COLORS.normal;
+      const arrowId = edge.cyclic ? "arrow-cyclic" : "arrow";
       elements.push(
-        `<path d="${path}" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>`,
+        `<path d="${path}" fill="none" stroke="${stroke}" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#${arrowId})"/>`,
       );
     }
   }
@@ -125,11 +131,12 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     const node = dagreGraph.node(id);
     const x = node.x - node.width / 2;
     const y = node.y - node.height / 2;
+    const colors = NODE_STYLES[nodeCategories.get(module) ?? "normal"];
     elements.push(
-      `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(node.width)}" height="${formatNumber(node.height)}" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>`,
+      `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(node.width)}" height="${formatNumber(node.height)}" rx="7" fill="#ffffff" stroke="${colors.stroke}" stroke-width="1"/>`,
     );
     elements.push(
-      `<text x="${formatNumber(node.x)}" y="${formatNumber(node.y)}" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">${escapeXml(module)}</text>`,
+      `<text x="${formatNumber(node.x)}" y="${formatNumber(node.y)}" fill="${colors.text}" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">${escapeXml(module)}</text>`,
     );
   }
 
@@ -137,7 +144,10 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
     "  <defs>",
     '    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">',
-    '      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>',
+    `      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="${EDGE_COLORS.normal}"/>`,
+    "    </marker>",
+    '    <marker id="arrow-cyclic" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">',
+    `      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="${EDGE_COLORS.cyclic}"/>`,
     "    </marker>",
     "  </defs>",
     `  <g transform="translate(0 ${SVG_TOP_PADDING})">`,
