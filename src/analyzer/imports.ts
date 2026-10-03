@@ -8,7 +8,6 @@ import type {
   SourceExtractor,
 } from "../plugin/types.ts";
 import type { AnalysisWarning, DependencyKind } from "../types.ts";
-export type { ImportExtractionResult, ImportReference };
 
 interface LocatedReference {
   reference: ImportReference;

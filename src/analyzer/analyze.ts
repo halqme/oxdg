@@ -2,7 +2,7 @@ import { readFile, realpath } from "node:fs/promises";
 import { relative, resolve, sep } from "node:path";
 import { discoverFiles, DEFAULT_EXTENSIONS } from "./discover.ts";
 import { extractImports } from "./imports.ts";
-import type { ImportReference } from "./imports.ts";
+import type { ImportReference } from "../plugin/types.ts";
 import { createResolver } from "./resolver.ts";
 import { createExcludeMatcher } from "./exclude.ts";
 import { createGraphBuilder } from "../graph/graph.ts";
