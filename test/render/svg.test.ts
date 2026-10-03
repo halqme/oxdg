@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { expect, test } from "bun:test";
 import { analyze } from "../../src/analyzer/analyze.ts";
 import { renderSvg } from "../../src/render/svg.ts";
@@ -45,6 +46,31 @@ test("renders SVG graphs with configurable direction and node category colors", 
   } finally {
     await removeFixture(root);
   }
+});
+
+test("keeps routed SVG edges inside the viewport", async () => {
+  const root = fileURLToPath(new URL("../../", import.meta.url));
+  const graph = (await analyze("src/index.ts", { cwd: root })).graph;
+  const svg = renderSvg(graph);
+  const groupStart = svg.indexOf('<g transform="translate(0 ');
+  const groupOpenEnd = svg.indexOf(">", groupStart);
+  const groupCloseStart = svg.indexOf("</g>", groupOpenEnd);
+
+  expect(groupStart).toBeGreaterThanOrEqual(0);
+  expect(groupOpenEnd).toBeGreaterThan(groupStart);
+  expect(groupCloseStart).toBeGreaterThan(groupOpenEnd);
+  const topPadding = Number(
+    svg.slice(groupStart + '<g transform="translate(0 '.length, groupOpenEnd - 2),
+  );
+  const drawing = svg.slice(groupOpenEnd + 1, groupCloseStart);
+  const edgeYs = [...drawing.matchAll(/<path d="([^"]+)"/g)].flatMap(([, path]) =>
+    [...(path ?? "").matchAll(/[ML]\s+-?[\d.]+\s+(-?[\d.]+)/g)].map((match) => Number(match[1])),
+  );
+  const height = Number(svg.slice(svg.indexOf('height="') + 'height="'.length).split('"')[0]);
+
+  expect(edgeYs.length).toBeGreaterThan(0);
+  expect(Math.min(...edgeYs) + topPadding).toBeGreaterThanOrEqual(24);
+  expect(Math.max(...edgeYs) + topPadding).toBeLessThan(height);
 });
 
 test("escapes module paths in SVG output", async () => {

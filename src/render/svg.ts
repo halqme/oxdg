@@ -109,12 +109,34 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
 
   const label = dagreGraph.graph();
   const width = Math.max(1, Math.ceil(label.width ?? 0));
-  const height = Math.max(1, Math.ceil(label.height ?? 0) + SVG_TOP_PADDING);
+  // Dagre can route long edges beyond its reported graph bounds.
+  let minY = 0;
+  let maxY = label.height ?? 0;
+  const edgeLayouts = layoutEdges.map((edge) => {
+    const points = dagreGraph.edge({ v: edge.from, w: edge.to }).points;
+    for (const point of points) {
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+    }
+    return { ...edge, points };
+  });
+
+  for (const module of modules) {
+    const id = ids.get(module);
+    if (!id) {
+      continue;
+    }
+    const node = dagreGraph.node(id);
+    minY = Math.min(minY, node.y - node.height / 2);
+    maxY = Math.max(maxY, node.y + node.height / 2);
+  }
+
+  const svgTopPadding = SVG_TOP_PADDING + Math.max(0, -minY);
+  const height = Math.max(1, Math.ceil(maxY + svgTopPadding));
   const elements: string[] = [];
 
-  for (const edge of layoutEdges) {
-    const points = dagreGraph.edge({ v: edge.from, w: edge.to }).points;
-    const path = pathForPoints(points);
+  for (const edge of edgeLayouts) {
+    const path = pathForPoints(edge.points);
     if (path) {
       const stroke = edge.cyclic ? EDGE_COLORS.cyclic : EDGE_COLORS.normal;
       const arrowId = edge.cyclic ? "arrow-cyclic" : "arrow";
@@ -151,7 +173,7 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
     `      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="${EDGE_COLORS.cyclic}"/>`,
     "    </marker>",
     "  </defs>",
-    `  <g transform="translate(0 ${SVG_TOP_PADDING})">`,
+    `  <g transform="translate(0 ${svgTopPadding})">`,
     ...elements.map((element) => `    ${element}`),
     "  </g>",
     "</svg>",

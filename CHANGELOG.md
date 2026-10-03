@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- SVG output no longer clips long dependency edges that Dagre routes above the graph.
+
 ### Maintenance
 
 - Organized shared types by analysis, graph, and rendering responsibilities.
