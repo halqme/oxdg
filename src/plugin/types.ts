@@ -1,4 +1,15 @@
-import type { ImportExtractionResult } from "../analyzer/imports.ts";
+import type { AnalysisWarning, DependencyKind } from "../types.ts";
+
+export interface ImportReference {
+  specifier: string;
+  kind: DependencyKind;
+  typeOnly: boolean;
+}
+
+export interface ImportExtractionResult {
+  imports: readonly ImportReference[];
+  warnings: readonly AnalysisWarning[];
+}
 
 export type ScriptLanguage = "js" | "jsx" | "ts" | "tsx";
 

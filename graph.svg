@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1936" height="1066" viewBox="0 0 1936 1066">
+<svg xmlns="http://www.w3.org/2000/svg" width="1670" height="1162" viewBox="0 0 1670 1162">
   <defs>
     <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
       <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
@@ -8,91 +8,84 @@
     </marker>
   </defs>
   <g transform="translate(0 24)">
-    <path d="M 269.56 759.50 L 379 1020 L 500 1020 L 621 1020 L 728.34 878.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 270.15 759.50 L 379 1000 L 500 1000 L 621 1000 L 742 1000 L 863 1000 L 976 1000 L 1089 1000 L 1198 1000 L 1307 1000 L 1432 1000 L 1557 1000 L 1582 1000" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 310.98 759.50 L 379 784.50 L 500 784.50 L 621 784.50 L 742 784.50 L 863 784.50 L 976 784.50 L 1089 784.50 L 1198 784.50 L 1307 784.50 L 1432 784.50 L 1557 784.50 L 1654.77 876" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 354 733.64 L 379 731.50 L 404 731.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 295.43 723.50 L 379 678.50 L 500 678.50 L 621 678.50 L 742 678.50 L 863 678.50 L 976 678.50 L 1089 678.50 L 1198 678.50 L 1307 678.50 L 1432 678.50 L 1557 678.50 L 1654.77 587" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 287.37 723.50 L 379 658.50 L 500 658.50 L 621 658.50 L 742 658.50 L 863 658.50 L 976 658.50 L 1089 658.50 L 1198 658.50 L 1307 658.50 L 1432 658.50 L 1557 658.50 L 1674 658.50 L 1791 658.50 L 1858.08 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 782.71 878.50 L 863 914 L 888 914" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 797.14 842.50 L 863 821 L 976 821 L 1089 821 L 1198 821 L 1307 821 L 1432 821 L 1557 821 L 1674 821 L 1791 821 L 1860.58 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1766 1000 L 1791 1000 L 1861.67 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1616.30 876 L 1557 857.50 L 1432 857.50 L 1307 857.50 L 1198 857.50 L 1089 857.50 L 1012 896" fill="none" stroke="#ef4444" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-cyclic)"/>
-    <path d="M 1643.70 912 L 1557 963.50 L 1508 953.11" fill="none" stroke="#ef4444" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-cyclic)"/>
-    <path d="M 1766 894 L 1791 894 L 1861.13 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 596 744.59 L 621 748 L 722.64 842.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 596 718.41 L 621 715 L 742 715 L 863 715 L 976 715 L 1089 715 L 1198 715 L 1307 715 L 1432 715 L 1557 715 L 1674 715 L 1791 715 L 1859.28 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1750 463 L 1791 463 L 1816 453.92" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1493.64 570.50 L 1557 589 L 1657.29 481" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1508 562.53 L 1557 569 L 1602 569" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1493.64 534.50 L 1557 516 L 1674 516 L 1791 516 L 1847.47 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1746 569 L 1791 569 L 1854.08 454.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1754 330.50 L 1791 330.50 L 1851.60 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 75.78 411.50 L 145 741.50 L 170 741.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 77.66 411.50 L 145 625.50 L 262 625.50 L 379 625.50 L 500 625.50 L 621 625.50 L 742 625.50 L 863 625.50 L 976 625.50 L 1089 625.50 L 1198 625.50 L 1307 625.50 L 1432 625.50 L 1557 625.50 L 1661.04 481" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 80.26 411.50 L 145 552.50 L 262 552.50 L 379 552.50 L 500 552.50 L 621 552.50 L 742 552.50 L 863 552.50 L 976 552.50 L 1089 552.50 L 1198 552.50 L 1307 552.50 L 1356 552.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 87.28 411.50 L 145 479.50 L 262 479.50 L 379 479.50 L 500 479.50 L 621 479.50 L 742 479.50 L 863 479.50 L 976 479.50 L 1089 479.50 L 1198 479.50 L 1307 479.50 L 1432 479.50 L 1557 479.50 L 1659.87 348.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 111.82 411.50 L 145 426.50 L 262 426.50 L 379 426.50 L 500 426.50 L 621 426.50 L 742 426.50 L 863 426.50 L 976 426.50 L 1089 426.50 L 1134 426.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 92.86 375.50 L 145 330.50 L 262 330.50 L 379 330.50 L 500 330.50 L 621 330.50 L 742 330.50 L 863 330.50 L 976 330.50 L 1089 330.50 L 1198 330.50 L 1307 330.50 L 1432 330.50 L 1557 330.50 L 1649.51 262.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 78.20 375.50 L 145 181.50 L 262 181.50 L 379 181.50 L 500 181.50 L 621 181.50 L 742 181.50 L 863 181.50 L 976 181.50 L 1089 181.50 L 1114 181.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 76.41 375.50 L 145 95.50 L 262 95.50 L 379 95.50 L 500 95.50 L 621 95.50 L 742 95.50 L 863 95.50 L 976 95.50 L 1089 95.50 L 1130 95.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 75.74 375.50 L 145 42 L 262 42 L 379 42 L 500 42 L 621 42 L 742 42 L 863 42 L 976 42 L 1089 42 L 1198 42 L 1307 42 L 1360 42" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 75.25 375.50 L 145 -11 L 262 -11 L 379 -11 L 500 -11 L 621 -11 L 742 -11 L 863 -11 L 976 -11 L 1089 -11 L 1198 -11 L 1307 -11 L 1432 -11 L 1557 -11 L 1674 -11 L 1791 -11 L 1861.06 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1017.09 932 L 1089 963.50 L 1198 963.50 L 1307 963.50 L 1356 953.11" fill="none" stroke="#ef4444" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-cyclic)"/>
-    <path d="M 1064 911.27 L 1089 910.50 L 1130 910.50" fill="none" stroke="#ef4444" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-cyclic)"/>
-    <path d="M 1493.64 919 L 1557 900.50 L 1582 899.11" fill="none" stroke="#ef4444" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-cyclic)"/>
-    <path d="M 1266 910.50 L 1307 910.50 L 1356 920.89" fill="none" stroke="#ef4444" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-cyclic)"/>
-    <path d="M 1262 436.19 L 1307 443 L 1418.69 292" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1262 416.81 L 1307 410 L 1432 410 L 1557 410 L 1674 410 L 1791 410 L 1816 419.08" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1746 244.50 L 1791 244.50 L 1857.16 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1219.21 199.50 L 1307 274 L 1332 274" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1281.49 163.50 L 1307 158 L 1432 158 L 1557 158 L 1674 158 L 1791 158 L 1859.28 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1532 290 L 1557 294 L 1661.54 445" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1532 274 L 1557 274 L 1636.73 312.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1455.44 256 L 1557 178 L 1674 178 L 1791 178 L 1858.92 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1244.16 113.50 L 1307 138 L 1415.46 256" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1266 95.19 L 1307 95 L 1432 95 L 1557 95 L 1674 95 L 1791 95 L 1860.15 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1504 51.50 L 1557 58.50 L 1668.79 445" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <path d="M 1504 32.50 L 1557 25.50 L 1674 25.50 L 1791 25.50 L 1860.80 418.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
-    <rect x="170" y="723.50" width="184" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="262" y="741.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/analyze.ts</text>
-    <rect x="646" y="842.50" width="192" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="742" y="860.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/discover.ts</text>
-    <rect x="1582" y="982" width="184" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1674" y="1000" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/exclude.ts</text>
-    <rect x="1582" y="876" width="184" height="36" rx="7" fill="#ffffff" stroke="#ef4444" stroke-width="1"/>
-    <text x="1674" y="894" fill="#b91c1c" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/imports.ts</text>
-    <rect x="404" y="713.50" width="192" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="500" y="731.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/resolver.ts</text>
-    <rect x="1598" y="445" width="152" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1674" y="463" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/cycles.ts</text>
-    <rect x="1356" y="534.50" width="152" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1432" y="552.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/filter.ts</text>
-    <rect x="1602" y="551" width="144" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1674" y="569" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/graph.ts</text>
-    <rect x="1594" y="312.50" width="160" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1674" y="330.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/queries.ts</text>
-    <rect x="24" y="375.50" width="96" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="72" y="393.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/index.ts</text>
-    <rect x="888" y="896" width="176" height="36" rx="7" fill="#ffffff" stroke="#ef4444" stroke-width="1"/>
-    <text x="976" y="914" fill="#b91c1c" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/plugin/registry.ts</text>
-    <rect x="1356" y="919" width="152" height="36" rx="7" fill="#ffffff" stroke="#ef4444" stroke-width="1"/>
-    <text x="1432" y="937" fill="#b91c1c" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/plugin/types.ts</text>
-    <rect x="1130" y="892.50" width="136" height="36" rx="7" fill="#ffffff" stroke="#ef4444" stroke-width="1"/>
-    <text x="1198" y="910.50" fill="#b91c1c" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/plugin/vue.ts</text>
-    <rect x="1134" y="408.50" width="128" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1198" y="426.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/d2.ts</text>
-    <rect x="1602" y="226.50" width="144" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1674" y="244.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/json.ts</text>
-    <rect x="1114" y="163.50" width="168" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1198" y="181.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/mermaid.ts</text>
-    <rect x="1332" y="256" width="200" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1432" y="274" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/node-styles.ts</text>
-    <rect x="1130" y="77.50" width="136" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1198" y="95.50" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/svg.ts</text>
-    <rect x="1360" y="24" width="144" height="36" rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"/>
-    <text x="1432" y="42" fill="#1d4ed8" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/text.ts</text>
-    <rect x="1816" y="418.50" width="96" height="36" rx="7" fill="#ffffff" stroke="#22c55e" stroke-width="1"/>
-    <text x="1864" y="436.50" fill="#15803d" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/types.ts</text>
+    <path d="M 268.61 815 L 379 1115.50 L 500 1115.50 L 621 1115.50 L 715.76 1050.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 269.06 815 L 379 1095.50 L 500 1095.50 L 621 1095.50 L 742 1095.50 L 863 1095.50 L 976 1095.50 L 1089 1095.50 L 1190 1095.50 L 1291 1095.50 L 1316 1095.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 287.37 815 L 379 880 L 500 880 L 621 880 L 650 880" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 354 789.14 L 379 787 L 404 787" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 295.43 779 L 379 734 L 500 734 L 621 734 L 742 734 L 863 734 L 976 734 L 1089 734 L 1190 734 L 1291 734 L 1385.35 659" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 287.37 779 L 379 714 L 500 714 L 621 714 L 742 714 L 863 714 L 976 714 L 1089 714 L 1190 714 L 1291 714 L 1396.03 872" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 282.45 779 L 379 694 L 500 694 L 621 694 L 742 694 L 863 694 L 976 694 L 1089 694 L 1190 694 L 1291 694 L 1408 694 L 1525 694 L 1589.18 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 838 1024.57 L 863 1022.50 L 951.49 957.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 838 1040.43 L 863 1042.50 L 976 1042.50 L 1089 1042.50 L 1190 1042.50 L 1291 1042.50 L 1408 1042.50 L 1525 1042.50 L 1595.36 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1500 1095.50 L 1525 1095.50 L 1595.61 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 788.84 862 L 863 833.50 L 956.81 921.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 834 864.79 L 863 860 L 976 860 L 1089 860 L 1190 860 L 1291 860 L 1337.80 872" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 759.78 898 L 863 1002.50 L 976 1002.50 L 1089 1002.50 L 1190 1002.50 L 1291 1002.50 L 1408 1002.50 L 1525 1002.50 L 1595.13 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 596 773.91 L 621 770.50 L 733.69 1014.50" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 596 794.93 L 621 797 L 742 797 L 863 797 L 976 797 L 1089 797 L 1190 797 L 1291 797 L 1408 797 L 1525 797 L 1592.79 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1484 449 L 1525 449 L 1584.31 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1266 486.95 L 1291 482 L 1344.18 467" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1226.73 520 L 1291 551.50 L 1384.47 623" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1211.14 520 L 1291 588 L 1408 588 L 1525 588 L 1567.44 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1480 641 L 1525 641 L 1584.31 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1488 535 L 1525 535 L 1550 538.42" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 74.75 338 L 145 797 L 170 797" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 76.32 338 L 145 624.50 L 262 624.50 L 379 624.50 L 500 624.50 L 621 624.50 L 742 624.50 L 863 624.50 L 976 624.50 L 1089 624.50 L 1190 624.50 L 1291 624.50 L 1396 467" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 79.22 338 L 145 502 L 262 502 L 379 502 L 500 502 L 621 502 L 742 502 L 863 502 L 976 502 L 1089 502 L 1114 502" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 82.47 338 L 145 445.50 L 262 445.50 L 379 445.50 L 500 445.50 L 621 445.50 L 742 445.50 L 863 445.50 L 976 445.50 L 1089 445.50 L 1190 445.50 L 1291 445.50 L 1384.47 517" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 102.56 338 L 145 363 L 262 363 L 379 363 L 500 363 L 621 363 L 742 363 L 863 363 L 976 363 L 1089 363 L 1190 363 L 1291 363 L 1344 363" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 102.56 302 L 145 277 L 262 277 L 379 277 L 500 277 L 621 277 L 742 277 L 863 277 L 976 277 L 1089 277 L 1190 277 L 1291 277 L 1336 277" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 82.19 302 L 145 191 L 262 191 L 379 191 L 500 191 L 621 191 L 742 191 L 863 191 L 976 191 L 1089 191 L 1190 191 L 1291 191 L 1324 191" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 78.11 302 L 145 105 L 262 105 L 379 105 L 500 105 L 621 105 L 742 105 L 863 105 L 976 105 L 1089 105 L 1190 105 L 1291 105 L 1340 105" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 76.73 302 L 145 42 L 262 42 L 379 42 L 500 42 L 621 42 L 742 42 L 863 42 L 976 42 L 1089 42 L 1118 42" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 75.97 302 L 145 -11 L 262 -11 L 379 -11 L 500 -11 L 621 -11 L 742 -11 L 863 -11 L 976 -11 L 1089 -11 L 1190 -11 L 1291 -11 L 1408 -11 L 1525 -11 L 1595.64 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1052.75 957.50 L 1089 966 L 1190 966 L 1291 966 L 1380.29 908" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1052.75 921.50 L 1089 913 L 1122 913" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1484 890 L 1525 890 L 1594.19 563" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1258 913 L 1291 913 L 1332 904.94" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1472 363 L 1525 363 L 1590.78 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1480 277 L 1525 277 L 1593.10 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1492 191 L 1525 191 L 1594.29 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1476 105 L 1525 105 L 1595.01 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1262 30.24 L 1291 25.50 L 1403.03 431" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <path d="M 1262 49.13 L 1291 52 L 1408 52 L 1525 52 L 1595.33 527" fill="none" stroke="#94a3b8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+    <rect x="170" y="779" width="184" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="262" y="797" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/analyze.ts</text>
+    <rect x="646" y="1014.50" width="192" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="742" y="1032.50" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/discover.ts</text>
+    <rect x="1316" y="1077.50" width="184" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="1095.50" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/exclude.ts</text>
+    <rect x="650" y="862" width="184" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="742" y="880" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/imports.ts</text>
+    <rect x="404" y="769" width="192" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="500" y="787" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/analyzer/resolver.ts</text>
+    <rect x="1332" y="431" width="152" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="449" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/cycles.ts</text>
+    <rect x="1114" y="484" width="152" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1190" y="502" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/filter.ts</text>
+    <rect x="1336" y="623" width="144" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="641" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/graph.ts</text>
+    <rect x="1328" y="517" width="160" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="535" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/graph/queries.ts</text>
+    <rect x="24" y="302" width="96" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="72" y="320" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/index.ts</text>
+    <rect x="888" y="921.50" width="176" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="976" y="939.50" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/plugin/registry.ts</text>
+    <rect x="1332" y="872" width="152" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="890" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/plugin/types.ts</text>
+    <rect x="1122" y="895" width="136" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1190" y="913" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/plugin/vue.ts</text>
+    <rect x="1344" y="345" width="128" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="363" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/d2.ts</text>
+    <rect x="1336" y="259" width="144" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="277" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/json.ts</text>
+    <rect x="1324" y="173" width="168" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="191" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/mermaid.ts</text>
+    <rect x="1340" y="87" width="136" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1408" y="105" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/svg.ts</text>
+    <rect x="1118" y="24" width="144" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1190" y="42" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/render/text.ts</text>
+    <rect x="1550" y="527" width="96" height="36" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="1598" y="545" fill="#1e293b" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">src/types.ts</text>
   </g>
 </svg>
