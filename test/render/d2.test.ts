@@ -9,12 +9,22 @@ test("renders D2 graph nodes and dependencies", async () => {
     "src/b.ts": 'import "./c.js";\n',
     "src/c.ts": 'import "./a.js";\n',
     "src/leaf.ts": "export const leaf = true;\n",
+    "src/normal.ts": 'import "./leaf.js";\n',
+    "src/self.ts": 'import "./self.js";\n',
   });
 
   try {
     const graph = (await analyze("src", { cwd: root })).graph;
 
-    expect(renderD2(graph)).toContain('n0: "src/a.ts"');
+    const d2 = renderD2(graph);
+
+    expect(d2).toContain('n0: "src/a.ts"');
+    expect(d2).toContain('n0.style.stroke: "#ef4444"\nn0.style.font-color: "#b91c1c"');
+    expect(d2).toContain('n3.style.stroke: "#22c55e"\nn3.style.font-color: "#15803d"');
+    expect(d2).toContain('n4.style.stroke: "#3b82f6"\nn4.style.font-color: "#1d4ed8"');
+    expect(d2).toContain('n0 -> n1: {\n  style.stroke: "#ef4444"\n}');
+    expect(d2).toContain('n4 -> n3: {\n  style.stroke: "#94a3b8"\n}');
+    expect(d2).toContain('n5 -> n5: {\n  style.stroke: "#ef4444"\n}');
   } finally {
     await removeFixture(root);
   }

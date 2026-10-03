@@ -3,12 +3,24 @@ import { analyze } from "../../src/analyzer/analyze.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { createFixture, removeFixture } from "../fixtures.ts";
 
-test("renders SVG graphs with configurable direction and edge markers", async () => {
+function expectNodeColors(svg: string, module: string, stroke: string, text: string): void {
+  const label = `>${module}</text>`;
+  const labelEnd = svg.indexOf(label);
+  expect(labelEnd).toBeGreaterThanOrEqual(0);
+  const rectStart = svg.lastIndexOf("<rect ", labelEnd);
+  const markup = svg.slice(rectStart, labelEnd + label.length);
+  expect(markup).toContain(`stroke="${stroke}"`);
+  expect(markup).toContain(`fill="${text}"`);
+}
+
+test("renders SVG graphs with configurable direction and node category colors", async () => {
   const root = await createFixture({
     "src/a.ts": 'import "./b.js";\n',
     "src/b.ts": 'import "./c.js";\n',
     "src/c.ts": 'import "./a.js";\n',
     "src/leaf.ts": "export const leaf = true;\n",
+    "src/normal.ts": 'import "./leaf.js";\n',
+    "src/self.ts": 'import "./self.js";\n',
   });
 
   try {
@@ -18,9 +30,17 @@ test("renders SVG graphs with configurable direction and edge markers", async ()
     expect(svg).not.toBe(renderSvg(graph));
     expect(svg).toContain("<marker");
     expect(svg).toContain('stroke-linejoin="round"');
-    expect(svg).toContain('rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"');
+    expect(svg).toContain('fill="none" stroke="#94a3b8" stroke-width="1.25"');
+    expect(svg).toContain('fill="none" stroke="#ef4444" stroke-width="1.25"');
+    expect(svg).toContain('marker-end="url(#arrow)"');
+    expect(svg).toContain('marker-end="url(#arrow-cyclic)"');
+    expect(svg.match(/marker-end="url\(#arrow\)"/g)?.length).toBe(1);
+    expect(svg.match(/marker-end="url\(#arrow-cyclic\)"/g)?.length).toBe(4);
+    expect(svg).toContain('rx="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1"');
     expect(svg).toContain('text-anchor="middle"');
-    expect(svg).toContain("src/a.ts");
+    expectNodeColors(svg, "src/normal.ts", "#3b82f6", "#1d4ed8");
+    expectNodeColors(svg, "src/leaf.ts", "#22c55e", "#15803d");
+    expectNodeColors(svg, "src/a.ts", "#ef4444", "#b91c1c");
     expect(svg).toContain('<g transform="translate(0 24)">');
   } finally {
     await removeFixture(root);

@@ -1,3 +1,4 @@
+import { classifyGraph, EDGE_COLORS, isCycleEdge, NODE_STYLES } from "./node-styles.ts";
 import type { GraphDirection, ModuleGraph } from "../types.ts";
 
 export interface MermaidRenderOptions {
@@ -20,15 +21,26 @@ function escapeLabel(label: string): string {
 export function renderMermaid(graph: ModuleGraph, options: MermaidRenderOptions = {}): string {
   const nodes = [...graph.nodes.keys()].sort(compareStrings);
   const ids = new Map(nodes.map((module, index) => [module, `n${index}`]));
-  const lines = [`flowchart ${options.direction ?? "LR"}`];
+  const graphStyles = classifyGraph(graph);
+  const nodeCategories = graphStyles.nodeCategories;
+  const lines = [
+    `flowchart ${options.direction ?? "LR"}`,
+    ...Object.entries(NODE_STYLES).map(
+      ([category, colors]) =>
+        `  classDef ${category} fill:#ffffff,stroke:${colors.stroke},color:${colors.text};`,
+    ),
+  ];
 
   for (const module of nodes) {
     const nodeId = ids.get(module);
-    if (nodeId) {
+    const category = nodeCategories.get(module);
+    if (nodeId && category) {
       lines.push(`  ${nodeId}["${escapeLabel(module)}"]`);
+      lines.push(`  class ${nodeId} ${category};`);
     }
   }
 
+  let linkIndex = 0;
   for (const edge of graph.edges) {
     if (edge.status !== "internal" || edge.to === undefined) {
       continue;
@@ -36,7 +48,12 @@ export function renderMermaid(graph: ModuleGraph, options: MermaidRenderOptions 
     const from = ids.get(edge.from);
     const to = ids.get(edge.to);
     if (from && to) {
+      const stroke = isCycleEdge(graphStyles, edge.from, edge.to)
+        ? EDGE_COLORS.cyclic
+        : EDGE_COLORS.normal;
       lines.push(`  ${from} --> ${to}`);
+      lines.push(`  linkStyle ${linkIndex} stroke:${stroke};`);
+      linkIndex += 1;
     }
   }
 
