@@ -1,6 +1,7 @@
 import { graphlib, layout } from "@dagrejs/dagre";
 import { classifyGraph, EDGE_COLORS, isCycleEdge, NODE_STYLES } from "./node-styles.ts";
-import type { GraphDirection, ModuleGraph } from "../types.ts";
+import type { GraphDirection } from "../types/render.ts";
+import type { ModuleGraph } from "../types/graph.ts";
 
 export interface SvgRenderOptions {
   direction?: GraphDirection;

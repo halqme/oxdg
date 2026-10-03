@@ -1,4 +1,4 @@
-import type { DependencyEdge, ModuleGraph, ModuleNode } from "../types.ts";
+import type { DependencyEdge, ModuleGraph, ModuleNode } from "../types/graph.ts";
 
 export interface GraphBuilder {
   addNode(node: ModuleNode): void;

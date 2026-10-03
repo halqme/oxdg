@@ -11,8 +11,8 @@ import type {
   AnalysisWarning,
   AnalyzeInput,
   AnalyzeOptions,
-  DependencyEdge,
-} from "../types.ts";
+} from "../types/analysis.ts";
+import type { DependencyEdge } from "../types/graph.ts";
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
