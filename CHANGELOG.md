@@ -17,6 +17,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Plain-text graphs label dependencies crossing into npm packages as `npm:<package>`.
 - Consistent color-coding for "normal", "leaf", and "cyclic" modules and edges across D2, Mermaid, and SVG renderers, making visualizations more informative and easier to interpret.
 
 ## [0.4.2] - 2026-10-02

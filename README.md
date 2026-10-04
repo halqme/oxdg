@@ -130,7 +130,7 @@ npx oxdg ./src/index.ts --image graph.svg
 
 Without an output option, oxdg prints a plain-text dependency graph.
 
-Additional analysis options include `--cwd`, `--tsconfig` (or `--ts-config`), `--include-npm`, `--no-type-imports`, `--extensions ts,tsx`, and repeated `--exclude` patterns.
+Additional analysis options include `--cwd`, `--tsconfig` (or `--ts-config`), `--include-npm`, `--no-type-imports`, `--extensions ts,tsx`, and repeated `--exclude` patterns. With `--include-npm`, plain-text output labels edges into npm packages as `npm:<package>`.
 
 Exclude strings use gitignore semantics via the `ignore` package, relative to `cwd` (the current directory by default), for both input files and imported modules. For example, `*.test.ts` matches at any depth, `/generated.ts` matches only at the root, `src/generated.ts` matches that path from the root, and `generated/` excludes directories of that name and their contents. Patterns are evaluated in order; `!` re-includes matching paths, but a file cannot be re-included while its parent directory is excluded. Comments (`#`) and backslash escapes follow gitignore syntax. `.gitignore` files are not loaded automatically, and gitignore patterns do not apply to modules outside `cwd`.
 

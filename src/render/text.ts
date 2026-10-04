@@ -5,6 +5,34 @@ function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+function npmPackageName(moduleId: string): string | undefined {
+  const segments = moduleId.split("/");
+  const nodeModulesIndex = segments.lastIndexOf("node_modules");
+  if (nodeModulesIndex === -1) {
+    return undefined;
+  }
+
+  const packageIndex = nodeModulesIndex + 1;
+  const packageSegment = segments[packageIndex];
+  if (packageSegment === undefined) {
+    return undefined;
+  }
+
+  if (packageSegment.startsWith("@")) {
+    const scopedPackage = segments[packageIndex + 1];
+    return scopedPackage === undefined ? undefined : `${packageSegment}/${scopedPackage}`;
+  }
+
+  return packageSegment;
+}
+
+function displayTarget(from: string, target: string): string {
+  const targetPackage = npmPackageName(target);
+  return targetPackage !== undefined && targetPackage !== npmPackageName(from)
+    ? `npm:${targetPackage}`
+    : target;
+}
+
 export function renderText(graph: ModuleGraph): string {
   const edgesByModule = new Map<string, Set<string>>();
   for (const edge of graph.edges) {
@@ -18,7 +46,11 @@ export function renderText(graph: ModuleGraph): string {
 
   const blocks = [...graph.nodes.keys()].sort(compareStrings).map((module) => {
     const lines = [module];
-    const targets = [...(edgesByModule.get(module) ?? [])].sort(compareStrings);
+    const targets = [
+      ...new Set(
+        [...(edgesByModule.get(module) ?? [])].map((target) => displayTarget(module, target)),
+      ),
+    ].sort(compareStrings);
     lines.push(...targets.map((target) => `  -> ${target}`));
     return lines.join("\n");
   });
