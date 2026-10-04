@@ -4,7 +4,11 @@ All notable user-facing and maintenance changes to oxdg are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.5.0] - 2026-10-04
+
+### Added
+
+- With `--include-npm`, resolved npm dependencies are represented by package-level `npm:<package>` nodes with distinct colors in Mermaid, D2, and SVG output.
 
 ### Fixed
 
@@ -18,7 +22,6 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- With `--include-npm`, resolved npm dependencies are represented by package-level `npm:<package>` nodes with distinct colors in Mermaid, D2, and SVG output.
 - Consistent color-coding for "normal", "leaf", and "cyclic" modules and edges across D2, Mermaid, and SVG renderers, making visualizations more informative and easier to interpret.
 
 ## [0.4.2] - 2026-10-02
