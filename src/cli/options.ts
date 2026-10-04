@@ -1,6 +1,6 @@
 import { Command, CommanderError, InvalidArgumentError } from "commander";
 import { extname } from "node:path";
-import type { GraphDirection } from "../types.ts";
+import type { GraphDirection } from "../types/render.ts";
 import { packageVersion } from "./version.ts";
 
 export interface CliOptions {

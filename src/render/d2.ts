@@ -1,5 +1,5 @@
 import { classifyGraph, EDGE_COLORS, isCycleEdge, NODE_STYLES } from "./node-styles.ts";
-import type { ModuleGraph } from "../types.ts";
+import type { ModuleGraph } from "../types/graph.ts";
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;

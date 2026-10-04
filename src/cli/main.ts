@@ -9,7 +9,8 @@ import { renderD2 } from "../render/d2.ts";
 import { renderJson } from "../render/json.ts";
 import { renderMermaid } from "../render/mermaid.ts";
 import { renderCycles, renderText } from "../render/text.ts";
-import type { AnalyzeOptions, ModuleGraph, ModuleId } from "../types.ts";
+import type { AnalyzeOptions } from "../types/analysis.ts";
+import type { ModuleGraph, ModuleId } from "../types/graph.ts";
 import { CliUsageError, parseCliOptions } from "./options.ts";
 
 function printWarnings(warnings: readonly { code: string; file: string; message: string }[]): void {

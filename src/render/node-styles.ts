@@ -1,6 +1,6 @@
 import { findCycles } from "../graph/cycles.ts";
 import { findLeaves } from "../graph/queries.ts";
-import type { ModuleGraph, ModuleId } from "../types.ts";
+import type { ModuleGraph, ModuleId } from "../types/graph.ts";
 
 export const NODE_STYLES = {
   normal: { stroke: "#3b82f6", text: "#1d4ed8" },

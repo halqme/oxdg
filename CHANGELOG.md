@@ -6,6 +6,15 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- SVG output no longer clips long dependency edges that Dagre routes above the graph.
+
+### Maintenance
+
+- Organized shared types by analysis, graph, and rendering responsibilities.
+- Removed the unused aggregate type barrel; tests import types from their domain modules.
+
 ### Changed
 
 - Consistent color-coding for "normal", "leaf", and "cyclic" modules and edges across D2, Mermaid, and SVG renderers, making visualizations more informative and easier to interpret.

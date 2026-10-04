@@ -7,7 +7,8 @@ import type {
   ScriptLanguage,
   SourceExtractor,
 } from "../plugin/types.ts";
-import type { AnalysisWarning, DependencyKind } from "../types.ts";
+import type { AnalysisWarning } from "../types/analysis.ts";
+import type { DependencyKind } from "../types/graph.ts";
 
 interface LocatedReference {
   reference: ImportReference;

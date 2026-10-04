@@ -1,6 +1,6 @@
 import { relative, sep } from "node:path";
 import ignore from "ignore";
-import type { ExcludePattern } from "../types.ts";
+import type { ExcludePattern } from "../types/analysis.ts";
 
 export type ExcludeMatcher = (filePath: string) => boolean;
 

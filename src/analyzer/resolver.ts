@@ -1,7 +1,8 @@
 import { extname, isAbsolute, resolve } from "node:path";
 import { ResolverFactory } from "oxc-resolver";
 import { DEFAULT_EXTENSIONS } from "./discover.ts";
-import type { AnalyzeOptions, DependencyKind } from "../types.ts";
+import type { AnalyzeOptions } from "../types/analysis.ts";
+import type { DependencyKind } from "../types/graph.ts";
 
 const JSON_EXTENSION = ".json";
 

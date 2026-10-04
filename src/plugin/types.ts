@@ -1,4 +1,5 @@
-import type { AnalysisWarning, DependencyKind } from "../types.ts";
+import type { AnalysisWarning } from "../types/analysis.ts";
+import type { DependencyKind } from "../types/graph.ts";
 
 export interface ImportReference {
   specifier: string;

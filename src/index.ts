@@ -18,20 +18,24 @@ export { renderD2 } from "./render/d2.ts";
 export { renderSvg } from "./render/svg.ts";
 
 export type {
-  AnalyzeInput,
-  AnalyzeOptions,
   AnalysisResult,
   AnalysisWarning,
   AnalysisWarningCode,
+  AnalyzeInput,
+  AnalyzeOptions,
+  ExcludePattern,
+} from "./types/analysis.ts";
+
+export type {
   DependencyEdge,
   DependencyKind,
   DependencyStatus,
-  ExcludePattern,
-  GraphDirection,
   ModuleGraph,
   ModuleId,
   ModuleNode,
-} from "./types.ts";
+} from "./types/graph.ts";
+
+export type { GraphDirection } from "./types/render.ts";
 
 export type { Cycle } from "./graph/cycles.ts";
 export type { MermaidRenderOptions } from "./render/mermaid.ts";

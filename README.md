@@ -20,7 +20,7 @@ npx oxdg src --circular
 npx oxdg src --image graph.svg
 ```
 
-![npx oxdg src/index.ts --image graph.svg](https://raw.githubusercontent.com/halqme/oxdg/refs/heads/main/graph.svg)
+![bunx oxdg --cwd src index.ts -i graph.svg](https://raw.githubusercontent.com/halqme/oxdg/refs/heads/main/graph.svg)
 
 ## Features
 
