@@ -11,6 +11,10 @@ const extensionSet = new Set(extensions.map((extension) => `.${extension}`));
 const defaultWarmup = 8;
 const defaultRuns = 20;
 
+function compareStrings(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function optionValue(name) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : undefined;
@@ -79,7 +83,7 @@ function normalizeModuleId(cwd, value) {
 }
 
 function summarizeModuleIds(cwd, ids) {
-  const moduleIds = [...new Set(ids.map((id) => normalizeModuleId(cwd, id)))].sort();
+  const moduleIds = [...new Set(ids.map((id) => normalizeModuleId(cwd, id)))].sort(compareStrings);
   const sourceModuleIds = moduleIds.filter((id) => extensionSet.has(extname(id).toLowerCase()));
   return {
     graphNodes: moduleIds.length,

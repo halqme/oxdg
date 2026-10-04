@@ -49,13 +49,6 @@ function formatRelative(ratio) {
   return ratio > 1 ? `${ratio.toFixed(2)}× slower` : `${(1 / ratio).toFixed(2)}× faster`;
 }
 
-function comparisonForOxdg(ratio, tool) {
-  if (Math.abs(ratio - 1) < 0.005) return `at parity with ${competitorLabels[tool]}`;
-  return ratio > 1
-    ? `${ratio.toFixed(2)}× faster than ${competitorLabels[tool]}`
-    : `${(1 / ratio).toFixed(2)}× slower than ${competitorLabels[tool]}`;
-}
-
 function formatDelta(percent) {
   if (Math.abs(percent) < 0.05) return "0.0%";
   return `${percent > 0 ? "+" : ""}${percent.toFixed(1)}%`;
