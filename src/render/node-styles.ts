@@ -6,6 +6,7 @@ export const NODE_STYLES = {
   normal: { stroke: "#3b82f6", text: "#1d4ed8" },
   leaf: { stroke: "#22c55e", text: "#15803d" },
   cyclic: { stroke: "#ef4444", text: "#b91c1c" },
+  npm: { stroke: "#a855f7", text: "#7e22ce" },
 } as const;
 
 export const EDGE_COLORS = {
@@ -43,7 +44,13 @@ export function classifyGraph(graph: ModuleGraph): GraphStyleClassification {
   for (const module of graph.nodes.keys()) {
     nodeCategories.set(
       module,
-      cyclicModules.has(module) ? "cyclic" : leafModules.has(module) ? "leaf" : "normal",
+      cyclicModules.has(module)
+        ? "cyclic"
+        : module.startsWith("npm:")
+          ? "npm"
+          : leafModules.has(module)
+            ? "leaf"
+            : "normal",
     );
   }
 

@@ -104,7 +104,7 @@ function createProgram(): Command {
     .option("--cwd <path>", "set the analysis root directory")
     .option("--tsconfig <path>", "use an explicit tsconfig.json")
     .option("--ts-config <path>", "alias for --tsconfig")
-    .option("--include-npm", "include source files inside node_modules")
+    .option("--include-npm", "include npm dependencies as package-level graph nodes")
     .option("--no-type-imports", "exclude type-only imports")
     .option("--extensions <list>", "comma-separated source file extensions", parseExtensions)
     .option("--exclude <pattern>", "exclude a gitignore pattern relative to cwd", collectExclude)

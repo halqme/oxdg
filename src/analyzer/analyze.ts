@@ -5,6 +5,7 @@ import { extractImports } from "./imports.ts";
 import type { ImportReference } from "../plugin/types.ts";
 import { createResolver } from "./resolver.ts";
 import { createExcludeMatcher } from "./exclude.ts";
+import { npmPackageFromPath } from "./npm.ts";
 import { createGraphBuilder } from "../graph/graph.ts";
 import type {
   AnalysisResult,
@@ -90,7 +91,6 @@ export async function analyze(
   const isExcluded = createExcludeMatcher(options.exclude, canonicalRoot);
   const files = await discoverFiles(input, {
     cwd,
-    includeNpm,
     extensions,
     exclude: isExcluded,
   });
@@ -150,7 +150,11 @@ export async function analyze(
         if (isExcluded(targetPath)) {
           continue;
         }
-        const targetId = moduleId(canonicalRoot, targetPath);
+        const npmPackage = includeNpm ? npmPackageFromPath(targetPath) : undefined;
+        const targetId = npmPackage?.id ?? moduleId(canonicalRoot, targetPath);
+        if (npmPackage) {
+          builder.addNode(npmPackage);
+        }
         edge = {
           from: id,
           to: targetId,
@@ -159,7 +163,7 @@ export async function analyze(
           typeOnly: reference.typeOnly,
           status: "internal",
         };
-        if (!analyzed.has(targetPath) && !pending.has(targetPath)) {
+        if (!npmPackage && !analyzed.has(targetPath) && !pending.has(targetPath)) {
           pending.add(targetPath);
           queue.push(targetPath);
         }

@@ -17,7 +17,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Plain-text graphs label dependencies crossing into npm packages as `npm:<package>`.
+- With `--include-npm`, resolved npm dependencies are represented by package-level `npm:<package>` nodes with distinct colors in Mermaid, D2, and SVG output.
 - Consistent color-coding for "normal", "leaf", and "cyclic" modules and edges across D2, Mermaid, and SVG renderers, making visualizations more informative and easier to interpret.
 
 ## [0.4.2] - 2026-10-02

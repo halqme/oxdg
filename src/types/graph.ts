@@ -1,3 +1,4 @@
+/** A root-relative source path or an npm:<package> ID for an included dependency. */
 export type ModuleId = string;
 
 export type DependencyKind =
@@ -11,6 +12,7 @@ export type DependencyStatus = "internal" | "external" | "unresolved";
 
 export interface ModuleNode {
   id: ModuleId;
+  /** Absolute source file path, or package directory for npm:<package> nodes. */
   absolutePath: string;
 }
 

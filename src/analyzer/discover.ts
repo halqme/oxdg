@@ -1,6 +1,7 @@
 import { lstat, readdir, realpath, stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { SOURCE_EXTRACTOR_PLUGINS } from "../plugin/registry.ts";
+import { isNodeModulesPath } from "./npm.ts";
 import type { AnalyzeInput } from "../types/analysis.ts";
 
 const CORE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts"] as const;
@@ -12,7 +13,6 @@ export const DEFAULT_EXTENSIONS = [
 
 export interface RequiredDiscoveryOptions {
   cwd: string;
-  includeNpm: boolean;
   extensions: readonly string[];
   exclude?: (filePath: string) => boolean;
 }
@@ -33,14 +33,9 @@ function isSupportedFile(filePath: string, extensions: ReadonlySet<string>): boo
   return extensions.has(extname(filePath).toLowerCase());
 }
 
-function isNodeModulesPath(filePath: string): boolean {
-  return filePath.replaceAll("\\", "/").split("/").includes("node_modules");
-}
-
 async function addDirectoryFiles(
   directory: string,
   extensions: ReadonlySet<string>,
-  includeNpm: boolean,
   exclude: (filePath: string) => boolean,
   files: Set<string>,
 ): Promise<void> {
@@ -48,13 +43,13 @@ async function addDirectoryFiles(
   entries.sort((left, right) => compareStrings(left.name, right.name));
 
   for (const entry of entries) {
-    if (entry.name === ".git" || (!includeNpm && entry.name === "node_modules")) {
+    if (entry.name === ".git" || entry.name === "node_modules") {
       continue;
     }
 
     const entryPath = join(directory, entry.name);
     if (entry.isDirectory()) {
-      await addDirectoryFiles(entryPath, extensions, includeNpm, exclude, files);
+      await addDirectoryFiles(entryPath, extensions, exclude, files);
       continue;
     }
 
@@ -75,7 +70,7 @@ async function addDirectoryFiles(
     const target = await stat(entryPath);
     if (target.isFile() && isSupportedFile(entryPath, extensions)) {
       const resolvedPath = await realpath(entryPath);
-      if (!exclude(resolvedPath)) {
+      if (!isNodeModulesPath(resolvedPath) && !exclude(resolvedPath)) {
         files.add(resolvedPath);
       }
     }
@@ -85,12 +80,11 @@ async function addDirectoryFiles(
 async function inspectInput(
   inputPath: string,
   extensions: ReadonlySet<string>,
-  includeNpm: boolean,
   exclude: (filePath: string) => boolean,
   files: Set<string>,
 ): Promise<void> {
   const absolutePath = resolve(inputPath);
-  if (!includeNpm && isNodeModulesPath(absolutePath)) {
+  if (isNodeModulesPath(absolutePath)) {
     return;
   }
   const link = await lstat(absolutePath);
@@ -99,7 +93,7 @@ async function inspectInput(
     const target = await stat(absolutePath);
     if (target.isFile() && isSupportedFile(absolutePath, extensions)) {
       const resolvedPath = await realpath(absolutePath);
-      if (!exclude(resolvedPath)) {
+      if (!isNodeModulesPath(resolvedPath) && !exclude(resolvedPath)) {
         files.add(resolvedPath);
       }
     }
@@ -117,7 +111,7 @@ async function inspectInput(
   }
 
   if (link.isDirectory()) {
-    await addDirectoryFiles(absolutePath, extensions, includeNpm, exclude, files);
+    await addDirectoryFiles(absolutePath, extensions, exclude, files);
   }
 }
 
@@ -133,7 +127,7 @@ export async function discoverFiles(
   for (const entry of inputs) {
     const absolutePath = resolve(options.cwd, entry);
     try {
-      await inspectInput(absolutePath, extensions, options.includeNpm, exclude, files);
+      await inspectInput(absolutePath, extensions, exclude, files);
     } catch (error) {
       if (error instanceof Error && "code" in error && error.code === "ENOENT") {
         throw new Error(`Input path does not exist: ${entry}`);

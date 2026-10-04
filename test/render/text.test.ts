@@ -21,7 +21,7 @@ test("renders modules and internal dependencies in stable order", async () => {
   }
 });
 
-test("renders npm package boundaries by name without changing module IDs", async () => {
+test("renders npm package IDs as package-level modules", async () => {
   const root = await createFixture({
     "src/entry.ts": [
       'import "fixture-package";',
@@ -29,10 +29,8 @@ test("renders npm package boundaries by name without changing module IDs", async
       'import "../shared/local.js";',
     ].join("\n"),
     "shared/local.js": "export const local = true;\n",
-    "node_modules/fixture-package/index.js": 'import "./internal.js";\nimport "nested-dep";\n',
+    "node_modules/fixture-package/index.js": 'import "./internal.js";\n',
     "node_modules/fixture-package/internal.js": "export const internal = true;\n",
-    "node_modules/fixture-package/node_modules/nested-dep/index.js":
-      "export const nested = true;\n",
     "node_modules/@scope/scoped/index.js": "export const scoped = true;\n",
   });
 
@@ -40,17 +38,13 @@ test("renders npm package boundaries by name without changing module IDs", async
     const graph = (await analyze("src/entry.ts", { cwd: root, includeNpm: true })).graph;
     const output = renderText(graph);
 
+    expect(output).toContain("npm:@scope/scoped\n\nnpm:fixture-package");
     expect(output).toContain(
       "src/entry.ts\n  -> npm:@scope/scoped\n  -> npm:fixture-package\n  -> shared/local.js",
     );
-    expect(output).toContain(
-      "node_modules/fixture-package/index.js\n  -> node_modules/fixture-package/internal.js\n  -> npm:nested-dep",
-    );
-    expect(graph.nodes.has("node_modules/fixture-package/index.js")).toBe(true);
-    expect(graph.nodes.has("node_modules/@scope/scoped/index.js")).toBe(true);
-    expect(graph.nodes.has("node_modules/fixture-package/node_modules/nested-dep/index.js")).toBe(
-      true,
-    );
+    expect(graph.nodes.has("npm:fixture-package")).toBe(true);
+    expect(graph.nodes.has("npm:@scope/scoped")).toBe(true);
+    expect(graph.nodes.has("node_modules/fixture-package/index.js")).toBe(false);
   } finally {
     await removeFixture(root);
   }
