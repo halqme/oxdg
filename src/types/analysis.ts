@@ -27,7 +27,7 @@ export interface AnalyzeOptions {
   /** Explicit tsconfig path. */
   tsconfig?: string;
 
-  /** Analyze files inside node_modules. Default: false. */
+  /** Represent resolved npm dependencies as package-level graph nodes. Default: false. */
   includeNpm?: boolean;
 
   /** Include type-only imports as graph edges. Default: true. */

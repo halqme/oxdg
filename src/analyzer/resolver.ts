@@ -1,6 +1,7 @@
 import { extname, isAbsolute, resolve } from "node:path";
 import { ResolverFactory } from "oxc-resolver";
 import { DEFAULT_EXTENSIONS } from "./discover.ts";
+import { isNodeModulesPath } from "./npm.ts";
 import type { AnalyzeOptions } from "../types/analysis.ts";
 import type { DependencyKind } from "../types/graph.ts";
 
@@ -28,11 +29,6 @@ function isSupportedFile(filePath: string, extensions: ReadonlySet<string>): boo
 
 function isJsonFile(filePath: string): boolean {
   return extname(filePath).toLowerCase() === JSON_EXTENSION;
-}
-
-function isNodeModulesPath(filePath: string): boolean {
-  const normalized = filePath.replaceAll("\\", "/");
-  return normalized.split("/").includes("node_modules");
 }
 
 function isBareSpecifier(specifier: string): boolean {
@@ -100,8 +96,8 @@ export function createResolver(options: AnalyzeOptions): Resolver {
 
       if (result.path) {
         const absolutePath = resolve(result.path);
-        if (!includeNpm && isNodeModulesPath(absolutePath)) {
-          return { status: "external" };
+        if (isNodeModulesPath(absolutePath)) {
+          return includeNpm ? { status: "internal", absolutePath } : { status: "external" };
         }
         if (isJsonFile(absolutePath)) {
           return { status: "external" };

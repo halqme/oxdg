@@ -1,3 +1,5 @@
+import { realpath } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 import { analyze } from "../../src/analyzer/analyze.ts";
 import type { DependencyEdge } from "../../src/types/graph.ts";
@@ -172,7 +174,7 @@ describe("module resolution", () => {
         from: "src/index.ts",
         specifier: "fixture-package",
         kind: "import",
-        to: "node_modules/fixture-package/import.js",
+        to: "npm:fixture-package",
         status: "internal",
       });
     });
@@ -186,7 +188,7 @@ describe("module resolution", () => {
         from: "src/legacy.cjs",
         specifier: "fixture-package",
         kind: "require",
-        to: "node_modules/fixture-package/require.cjs",
+        to: "npm:fixture-package",
         status: "internal",
       });
     });
@@ -200,7 +202,7 @@ describe("module resolution", () => {
         from: "src/index.ts",
         specifier: "fixture-package/feature",
         kind: "import",
-        to: "node_modules/fixture-package/feature/import.js",
+        to: "npm:fixture-package",
         status: "internal",
       });
     });
@@ -214,9 +216,81 @@ describe("module resolution", () => {
         from: "src/legacy.cjs",
         specifier: "fixture-package/feature",
         kind: "require-resolve",
-        to: "node_modules/fixture-package/feature/require.cjs",
+        to: "npm:fixture-package",
         status: "internal",
       });
+    });
+
+    test("represents resolved npm packages as package-level nodes", async () => {
+      const root = await createFixture({
+        "src/index.ts": [
+          'import "fixture-package";',
+          'import "fixture-package/feature";',
+          'import "@scope/scoped";',
+        ].join("\n"),
+        "node_modules/fixture-package/package.json": JSON.stringify({
+          name: "fixture-package",
+          exports: { ".": "./index.js", "./feature": "./feature.js" },
+        }),
+        "node_modules/fixture-package/index.js":
+          'import "./internal.js";\nimport "transitive-dep";\n',
+        "node_modules/fixture-package/feature.js": "export const feature = true;\n",
+        "node_modules/fixture-package/internal.js": "export const internal = true;\n",
+        "node_modules/fixture-package/node_modules/transitive-dep/index.js":
+          "export const transitive = true;\n",
+        "node_modules/@scope/scoped/package.json": JSON.stringify({
+          name: "@scope/scoped",
+          exports: "./index.js",
+        }),
+        "node_modules/@scope/scoped/index.js": "export const scoped = true;\n",
+        "packages/app/src/index.ts": 'import "nested-dep";\n',
+        "packages/app/node_modules/nested-dep/index.js": "export const nested = true;\n",
+      });
+
+      try {
+        const result = await analyze(["src/index.ts", "packages/app/src/index.ts"], {
+          cwd: root,
+          includeNpm: true,
+        });
+
+        expect([...result.graph.nodes.keys()]).toEqual([
+          "npm:@scope/scoped",
+          "npm:fixture-package",
+          "npm:nested-dep",
+          "packages/app/src/index.ts",
+          "src/index.ts",
+        ]);
+        expect(result.graph.nodes.get("npm:fixture-package")?.absolutePath).toBe(
+          await realpath(join(root, "node_modules/fixture-package")),
+        );
+        expect(result.graph.edges.filter((edge) => edge.from === "npm:fixture-package")).toEqual(
+          [],
+        );
+        expect(result.graph.nodes.has("node_modules/fixture-package/internal.js")).toBe(false);
+        expect(result.graph.nodes.has("npm:transitive-dep")).toBe(false);
+        expect(result.warnings).toEqual([]);
+
+        const excluded = await analyze("src/index.ts", {
+          cwd: root,
+          includeNpm: true,
+          exclude: "node_modules/fixture-package/index.js",
+        });
+        const packageEdges = excluded.graph.edges.filter(
+          (edge) => edge.from === "src/index.ts" && edge.to === "npm:fixture-package",
+        );
+        expect(packageEdges.map((edge) => edge.specifier)).toEqual(["fixture-package/feature"]);
+        expect(excluded.graph.nodes.has("npm:fixture-package")).toBe(true);
+
+        const defaults = await analyze("src/index.ts", { cwd: root });
+        expect(defaults.graph.nodes.has("npm:fixture-package")).toBe(false);
+        expectEdge(defaults, {
+          from: "src/index.ts",
+          specifier: "fixture-package",
+          status: "external",
+        });
+      } finally {
+        await removeFixture(root);
+      }
     });
 
     test("resolves a package's self-reference through its exports", async () => {
