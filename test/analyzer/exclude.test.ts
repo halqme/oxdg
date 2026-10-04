@@ -4,6 +4,12 @@ import { analyze } from "../../src/analyzer/analyze.ts";
 import type { ExcludePattern } from "../../src/types/analysis.ts";
 import { createFixture, removeFixture } from "../fixtures.ts";
 
+function compareStrings(left: string | undefined, right: string | undefined): number {
+  if (left === undefined) return right === undefined ? 0 : 1;
+  if (right === undefined) return -1;
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 const modules = [
   "generated.ts",
   "not-generated.ts",
@@ -81,8 +87,12 @@ for (const { name, patterns, excluded } of cases) {
       const kept = modules.filter((id) => !excluded.includes(id));
       for (const input of [".", "entry.ts"]) {
         const result = await analyze(input, { cwd: root, exclude: patterns });
-        expect([...result.graph.nodes.keys()].sort()).toEqual(["entry.ts", ...kept].sort());
-        expect(result.graph.edges.map((edge) => edge.to).sort()).toEqual([...kept].sort());
+        expect([...result.graph.nodes.keys()].sort(compareStrings)).toEqual(
+          ["entry.ts", ...kept].sort(compareStrings),
+        );
+        expect(result.graph.edges.map((edge) => edge.to).sort(compareStrings)).toEqual(
+          [...kept].sort(compareStrings),
+        );
         expect(result.warnings).toEqual([]);
       }
     } finally {

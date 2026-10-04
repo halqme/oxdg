@@ -12,6 +12,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Maintenance
 
+- Fixed Vite+ checks to type-check tests with their Bun and Node declarations and enforce explicit, deterministic sorting.
 - Organized shared types by analysis, graph, and rendering responsibilities.
 - Removed the unused aggregate type barrel; tests import types from their domain modules.
 

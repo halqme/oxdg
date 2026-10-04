@@ -42,7 +42,7 @@
   },
   "scripts": {
     "build": "vp pack",
-    "check": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit && tsc -p test/fixtures/tsconfig.typecheck.json --noEmit",
+    "check": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit && tsc -p test/fixtures/tsconfig.typecheck.json --noEmit",
     "lint": "vp lint src",
     "format": "vp fmt --write .",
     "format:check": "vp fmt --check .",
