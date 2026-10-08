@@ -300,12 +300,11 @@ function extractSourceImports(
       return { imports: references.map(({ reference }) => reference), warnings };
     }
 
-    // Oxc offsets are UTF-8 byte offsets, not JavaScript UTF-16 indices.
+    // Oxc's JavaScript API provides offsets in UTF-16 code units.
     // Build line starts only for explain requests, keeping the normal path unchanged.
-    const bytes = Buffer.from(source);
     const starts = [0];
-    for (let offset = 0; offset < bytes.length; offset += 1) {
-      if (bytes[offset] === 10) starts.push(offset + 1);
+    for (let offset = 0; offset < source.length; offset += 1) {
+      if (source.charCodeAt(offset) === 10) starts.push(offset + 1);
     }
     const lines = source.split(/\r?\n/);
     const imports = references.map(({ reference, start }) => {
