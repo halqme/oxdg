@@ -9,10 +9,7 @@ describe("dependency extraction", () => {
       'require("./b.js");',
     ].join("\n");
     const result = extractImports(source, "sample.ts", true);
-    expect(result.imports.map((item) => item.location)).toEqual([
-      { line: 2 },
-      { line: 3 },
-    ]);
+    expect(result.imports.map((item) => item.location)).toEqual([{ line: 2 }, { line: 3 }]);
     expect(extractImports(source, "sample.ts").imports.every((item) => !item.location)).toBe(true);
   });
 
