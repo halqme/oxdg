@@ -1,4 +1,4 @@
-import type { ModuleGraph } from "./graph.ts";
+import type { DependencyKind, ModuleGraph } from "./graph.ts";
 
 /** A gitignore pattern relative to the analysis cwd. */
 export type ExcludePattern = string;
@@ -15,12 +15,29 @@ export interface AnalysisWarning {
   message: string;
 }
 
+/** A source-level reason for a graph edge, captured only with explain enabled. */
+export interface DependencyExplanation {
+  from: string;
+  to?: string;
+  /** Root-relative path of the importing source file. */
+  source: string;
+  /** 1-based location of the import or re-export. */
+  line: number;
+  specifier: string;
+  kind: DependencyKind;
+  typeOnly: boolean;
+}
+
 export interface AnalysisResult {
   graph: ModuleGraph;
   warnings: readonly AnalysisWarning[];
+  explanations?: readonly DependencyExplanation[];
 }
 
 export interface AnalyzeOptions {
+  /** Collect source-line evidence for explanations. Default: false. */
+  explain?: boolean;
+
   /** Base directory. Defaults to process.cwd(). */
   cwd?: string;
 

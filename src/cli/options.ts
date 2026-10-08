@@ -16,6 +16,7 @@ export interface CliOptions {
   cwd?: string;
   tsconfig?: string;
   packages: boolean;
+  explain: boolean;
   includeNpm: boolean;
   includeTypeImports: boolean;
   extensions?: string[];
@@ -49,6 +50,7 @@ interface CommanderOptions {
   tsconfig?: string;
   tsConfig?: string;
   packages?: boolean;
+  explain?: boolean;
   includeNpm?: boolean;
   typeImports?: boolean;
   extensions?: string[];
@@ -107,6 +109,7 @@ function createProgram(): Command {
     .option("--tsconfig <path>", "use an explicit tsconfig.json")
     .option("--ts-config <path>", "alias for --tsconfig")
     .option("--packages", "aggregate actual imports between workspace packages")
+    .option("--explain", "show detected import lines for --depends or --circular")
     .option("--include-npm", "include npm dependencies as package-level graph nodes")
     .option("--no-type-imports", "exclude type-only imports")
     .option("--extensions <list>", "comma-separated source file extensions", parseExtensions)
@@ -125,6 +128,7 @@ function defaults(overrides: Partial<CliOptions> = {}): CliOptions {
     leaves: false,
     failOnCircular: false,
     packages: false,
+    explain: false,
     includeNpm: false,
     includeTypeImports: true,
     ...overrides,
@@ -181,6 +185,15 @@ export function parseCliOptions(argv: readonly string[]): CliOptions {
   if (queryCount > 1) {
     throw new CliUsageError("--orphans, --leaves, and --depends are mutually exclusive");
   }
+  if (
+    values.explain &&
+    (values.orphans || values.leaves || (!values.circular && values.depends === undefined))
+  ) {
+    throw new CliUsageError("--explain requires --depends or --circular");
+  }
+  if (values.explain && modes.some((mode) => mode !== "json")) {
+    throw new CliUsageError("--explain only supports text or JSON output");
+  }
   if (queryCount > 0 && values.circular === true) {
     throw new CliUsageError("query options cannot be combined with --circular");
   }
@@ -205,6 +218,7 @@ export function parseCliOptions(argv: readonly string[]): CliOptions {
     leaves: values.leaves === true,
     failOnCircular: values.failOnCircular === true,
     packages: values.packages === true,
+    explain: values.explain === true,
     includeNpm: values.includeNpm === true,
     includeTypeImports: values.typeImports !== false,
   });

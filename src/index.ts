@@ -16,12 +16,14 @@ export { renderText } from "./render/text.ts";
 export { renderJson } from "./render/json.ts";
 export { renderMermaid } from "./render/mermaid.ts";
 export { renderD2 } from "./render/d2.ts";
+export { renderExplanations } from "./render/explain.ts";
 export { renderSvg } from "./render/svg.ts";
 
 export type {
   AnalysisResult,
   AnalysisWarning,
   AnalysisWarningCode,
+  DependencyExplanation,
   AnalyzeInput,
   AnalyzeOptions,
   ExcludePattern,

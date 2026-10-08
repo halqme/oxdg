@@ -31,6 +31,7 @@ npx oxdg src --image graph.svg
 - Type-only imports and TypeScript path aliases
 - Circular dependency detection with CI-friendly failure codes
 - Orphan, leaf, and direct-dependent queries
+- Source-line explanations for dependencies and cycles, including workspace package graphs
 - Text, JSON, Mermaid, D2, and standalone SVG output
 - Zero-config one-shot CLI
 - No Graphviz or other system package required for SVG generation
@@ -108,6 +109,8 @@ bunx oxdg ./src --orphans
 bunx oxdg ./src --leaves
 bunx oxdg ./src --depends src/core.ts
 bunx oxdg ./src --json --orphans
+bunx oxdg ./src --depends src/core.ts --explain
+bunx oxdg ./src --circular --explain --json
 ```
 
 Adding `--json` to a query prints the matching module IDs as a JSON array.
@@ -161,6 +164,28 @@ Nodes use package names, including packages with no imports. Edges represent sou
 Workspace imports can resolve through package exports or entry points without installed workspace links, but their target files must exist; missing generated files remain unresolved. Files outside workspace packages are not represented. Directory symlinks are not discovered as workspace packages.
 
 The API exposes `analyzePackages(input, options)` with the same result shape as `analyze`.
+
+### Explain dependency origins
+
+Add `--explain` to `--depends` or `--circular` in either analysis mode:
+
+```bash
+oxdg src --depends src/core.ts --explain
+oxdg . --packages --depends @my-org/core --explain
+oxdg . --packages --circular --explain --json
+```
+
+Explanations report **only the importing source location** as `path:line` (1-based), grouped by dependency. They do not retain or print source code, columns, or surrounding context. Multiple imports on the same line establishing one dependency are listed only once. In package mode, multiple source locations may explain one package-level edge. `--explain --json` emits `from`, `to`, `source`, and `line` fields, without code or specifier metadata. Only detected static specifiers are represented; this does not infer why a developer chose an import.
+
+For example:
+
+```text
+@repo/app -> @repo/core
+  packages/app/src/main.ts:12
+  packages/app/src/router.ts:8
+```
+
+Source evidence is collected only when requested (`analyze(input, { explain: true })` or `analyzePackages(input, { explain: true })`). Regular JSON output is unchanged.
 
 ## Design
 

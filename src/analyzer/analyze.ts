@@ -10,6 +10,7 @@ import { createGraphBuilder } from "../graph/graph.ts";
 import type {
   AnalysisResult,
   AnalysisWarning,
+  DependencyExplanation,
   AnalyzeInput,
   AnalyzeOptions,
 } from "../types/analysis.ts";
@@ -111,6 +112,7 @@ export async function analyze(
   const resolver = createResolver(resolverOptions);
   const builder = createGraphBuilder(cwd);
   const warnings: AnalysisWarning[] = [];
+  const explanations: DependencyExplanation[] = [];
   const queue = [...files];
   const pending = new Set(files);
   const analyzed = new Set<string>();
@@ -135,7 +137,7 @@ export async function analyze(
     const id = moduleId(canonicalRoot, filePath);
     builder.addNode({ id, absolutePath: filePath });
 
-    const extraction = extractImports(source, filePath);
+    const extraction = extractImports(source, filePath, options.explain === true);
     warnings.push(...extraction.warnings);
 
     for (const reference of extraction.imports) {
@@ -180,6 +182,17 @@ export async function analyze(
         }
       }
       builder.addEdge(edge);
+      if (options.explain && reference.location) {
+        explanations.push({
+          from: id,
+          ...(edge.to === undefined ? {} : { to: edge.to }),
+          source: id,
+          line: reference.location.line,
+          specifier: reference.specifier,
+          kind: reference.kind,
+          typeOnly: reference.typeOnly,
+        });
+      }
     }
   }
 
@@ -187,5 +200,6 @@ export async function analyze(
   return {
     graph: builder.build(),
     warnings,
+    ...(options.explain ? { explanations } : {}),
   };
 }

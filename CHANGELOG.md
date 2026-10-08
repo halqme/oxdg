@@ -6,12 +6,18 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Keep routed SVG edges inside the viewport with bottom padding.
+
 ### Added
 
+- Explain dependency origins using only `path:line` source locations via `--depends --explain` and `--circular --explain` in both file and workspace package modes, with optional JSON output.
 - Generate package-level graphs from actual imports in npm, pnpm, Bun, and Yarn workspaces with `--packages`, including package queries, cycle detection, and all existing output formats.
 
 ### Maintenance
 
+- Added a repeatable benchmark for normal vs. explanation queries, reported by CI without performance gating.
 - Added checked-in workspace fixtures for npm, pnpm, Bun, and Yarn to verify package graphs, cycles, exclusions, and type-only imports without installed workspace links.
 
 ## [0.5.0] - 2026-10-04

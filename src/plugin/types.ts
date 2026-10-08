@@ -5,6 +5,8 @@ export interface ImportReference {
   specifier: string;
   kind: DependencyKind;
   typeOnly: boolean;
+  /** Populated only when source locations are requested. */
+  location?: { line: number };
 }
 
 export interface ImportExtractionResult {
@@ -18,12 +20,13 @@ export type ScriptExtractor = (
   source: string,
   filePath: string,
   language: ScriptLanguage,
+  includeLocations?: boolean,
 ) => ImportExtractionResult;
 
 export interface SourceExtractor {
   supports(filePath: string): boolean;
 
-  extract(source: string, filePath: string): ImportExtractionResult;
+  extract(source: string, filePath: string, includeLocations?: boolean): ImportExtractionResult;
 }
 
 export interface SourceExtractorPlugin {

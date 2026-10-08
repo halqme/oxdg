@@ -54,6 +54,9 @@ jobs:
       - name: Check package and report footprint
         run: bun run release:check -- --report package-footprint.json --summary "$GITHUB_STEP_SUMMARY"
 
+      - name: Benchmark explain query overhead
+        run: node scripts/benchmark-explain.mjs --runs 15
+
   runtime:
     name: Node.js ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

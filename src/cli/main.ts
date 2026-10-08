@@ -6,6 +6,7 @@ import { findCycles } from "../graph/cycles.ts";
 import { cyclicSubgraph } from "../graph/filter.ts";
 import { findDirectDependents, findLeaves, findOrphans } from "../graph/queries.ts";
 import { renderD2 } from "../render/d2.ts";
+import { renderExplanations } from "../render/explain.ts";
 import { renderJson } from "../render/json.ts";
 import { renderMermaid } from "../render/mermaid.ts";
 import { renderCycles, renderText } from "../render/text.ts";
@@ -71,6 +72,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
     const analysisOptions: AnalyzeOptions = {
       includeNpm: cliOptions.includeNpm,
       includeTypeImports: cliOptions.includeTypeImports,
+      explain: cliOptions.explain,
     };
     if (cliOptions.cwd !== undefined) {
       analysisOptions.cwd = cliOptions.cwd;
@@ -93,6 +95,30 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
       : await analyze(cliOptions.paths, analysisOptions);
     printWarnings(result.warnings);
     const cycles = cliOptions.circular || cliOptions.failOnCircular ? findCycles(result.graph) : [];
+
+    if (cliOptions.explain) {
+      const explanations = result.explanations ?? [];
+      let selected;
+      if (cliOptions.depends !== undefined) {
+        const target = resolveDependsModule(result.graph, cliOptions.depends);
+        selected = explanations.filter((item) => item.to === target);
+      } else {
+        const cycleEdges = new Set<string>();
+        for (const cycle of cycles) {
+          for (let index = 0; index < cycle.modules.length; index += 1) {
+            const from = cycle.modules[index];
+            const to = cycle.modules[(index + 1) % cycle.modules.length];
+            cycleEdges.add(JSON.stringify([from, to]));
+          }
+        }
+        selected = explanations.filter((item) =>
+          cycleEdges.has(JSON.stringify([item.from, item.to])),
+        );
+      }
+      process.stdout.write(renderExplanations(selected, cliOptions.format === "json"));
+      setExitCode(cliOptions.failOnCircular, cycles.length);
+      return;
+    }
 
     if (cliOptions.orphans || cliOptions.leaves || cliOptions.depends !== undefined) {
       const dependsModule =

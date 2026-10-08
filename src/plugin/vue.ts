@@ -17,6 +17,7 @@ interface VueTag {
 interface VueScriptBlock {
   source: string;
   language: VueScriptLanguage;
+  start: number;
 }
 
 function compareStrings(left: string, right: string): number {
@@ -114,6 +115,7 @@ function vueScriptBlocks(source: string): VueScriptBlock[] {
       blocks.push({
         source: source.slice(tag.end, close?.start ?? source.length),
         language: vueScriptLanguage(tag.attributes),
+        start: tag.end,
       });
       if (!close) {
         break;
@@ -139,10 +141,22 @@ function createVueSourceExtractor(extractScript: ScriptExtractor) {
       const extension = extname(filePath).toLowerCase();
       return VUE_EXTENSIONS.some((supported) => supported === extension);
     },
-    extract(source: string, filePath: string) {
-      const extractions = vueScriptBlocks(source).map((block) =>
-        extractScript(block.source, filePath, block.language),
-      );
+    extract(source: string, filePath: string, includeLocations = false) {
+      const extractions = vueScriptBlocks(source).map((block) => {
+        const extraction = extractScript(block.source, filePath, block.language, includeLocations);
+        if (!includeLocations) return extraction;
+        const offset = source.slice(0, block.start).split("\n").length - 1;
+        return {
+          ...extraction,
+          imports: extraction.imports.map((reference) => {
+            if (!reference.location) return reference;
+            return {
+              ...reference,
+              location: { line: offset + reference.location.line },
+            };
+          }),
+        };
+      });
       const imports = extractions.flatMap((extraction) => extraction.imports);
       const warnings = extractions.flatMap((extraction) => extraction.warnings);
       warnings.sort((left, right) => {
