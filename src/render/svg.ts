@@ -132,7 +132,7 @@ export function renderSvg(graph: ModuleGraph, options: SvgRenderOptions = {}): s
   }
 
   const svgTopPadding = SVG_TOP_PADDING + Math.max(0, -minY);
-  const height = Math.max(1, Math.ceil(maxY + svgTopPadding));
+  const height = Math.max(1, Math.ceil(maxY + svgTopPadding + GRAPH_MARGIN));
   const elements: string[] = [];
 
   for (const edge of edgeLayouts) {
