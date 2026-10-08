@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Keep routed SVG edges inside the viewport with bottom padding.
+
 ### Added
 
 - Explain dependency origins using only the detected import lines via `--depends --explain` and `--circular --explain` in both file and workspace package modes, with optional JSON output.
