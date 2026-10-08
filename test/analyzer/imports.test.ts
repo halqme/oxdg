@@ -2,6 +2,34 @@ import { describe, expect, test } from "bun:test";
 import { extractImports } from "../../src/analyzer/imports.ts";
 
 describe("dependency extraction", () => {
+  test("captures only the detected line when requested, including Unicode prefixes", () => {
+    const source = [
+      'const message = "日本語 😀";',
+      'import { a } from "./a.js";',
+      'require("./b.js");',
+    ].join("\n");
+    const result = extractImports(source, "sample.ts", true);
+    expect(result.imports.map((item) => item.location)).toEqual([
+      { line: 2, code: 'import { a } from "./a.js";' },
+      { line: 3, code: 'require("./b.js");' },
+    ]);
+    expect(extractImports(source, "sample.ts").imports.every((item) => !item.location)).toBe(true);
+  });
+
+  test("reports original Vue SFC line numbers", () => {
+    const source = [
+      "<template><div /></template>",
+      '<script setup lang="ts">',
+      'import { a } from "./a";',
+      "</script>",
+    ].join("\n");
+    const result = extractImports(source, "component.vue", true);
+    expect(result.imports[0]?.location).toEqual({
+      line: 3,
+      code: 'import { a } from "./a";',
+    });
+  });
+
   test("extracts static ESM imports", () => {
     const result = extractImports('import { value } from "./value.js";', "sample.ts");
 

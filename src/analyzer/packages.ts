@@ -6,7 +6,12 @@ import { analyze } from "./analyze.ts";
 import { discoverFiles, DEFAULT_EXTENSIONS } from "./discover.ts";
 import { createExcludeMatcher } from "./exclude.ts";
 import { createGraphBuilder } from "../graph/graph.ts";
-import type { AnalysisResult, AnalyzeInput, AnalyzeOptions } from "../types/analysis.ts";
+import type {
+  AnalysisResult,
+  AnalyzeInput,
+  AnalyzeOptions,
+  DependencyExplanation,
+} from "../types/analysis.ts";
 
 interface WorkspacePackage {
   id: string;
@@ -104,6 +109,7 @@ export async function analyzePackages(
     }
   }
   const builder = createGraphBuilder(cwd);
+  const explanations: DependencyExplanation[] = [];
   for (const pkg of packages) builder.addNode(pkg);
   const ownership = [...packages].sort((a, b) => b.absolutePath.length - a.absolutePath.length);
   const owner = (path: string) => ownership.find((pkg) => contains(pkg.absolutePath, path));
@@ -118,8 +124,22 @@ export async function analyzePackages(
       exclude: isExcluded,
     },
   );
-  if (!files.length) return { graph: builder.build(), warnings: [] };
+  if (!files.length)
+    return {
+      graph: builder.build(),
+      warnings: [],
+      ...(options.explain ? { explanations } : {}),
+    };
   const result = await analyze(files, options);
+  const evidenceByReference = new Map<string, DependencyExplanation[]>();
+  if (options.explain) {
+    for (const item of result.explanations ?? []) {
+      const key = JSON.stringify([item.from, item.specifier, item.kind, item.typeOnly]);
+      const existing = evidenceByReference.get(key) ?? [];
+      existing.push(item);
+      evidenceByReference.set(key, existing);
+    }
+  }
   const resolvedWarnings = new Set<string>();
   const esm = new ResolverFactory({
     builtinModules: true,
@@ -191,6 +211,12 @@ export async function analyzePackages(
       }
     }
     if (to === from.id) continue;
+    if (to && options.explain) {
+      const key = JSON.stringify([edge.from, edge.specifier, edge.kind, edge.typeOnly]);
+      for (const item of evidenceByReference.get(key) ?? []) {
+        explanations.push({ ...item, from: from.id, to });
+      }
+    }
     builder.addEdge(
       to
         ? { ...edge, from: from.id, to, status: "internal" }
@@ -205,6 +231,7 @@ export async function analyzePackages(
   }
   return {
     graph: builder.build(),
+    ...(options.explain ? { explanations } : {}),
     warnings: result.warnings.filter(
       (warning) =>
         !(warning.file && isExcluded(warning.file)) &&

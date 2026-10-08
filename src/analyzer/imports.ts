@@ -219,6 +219,7 @@ function extractSourceImports(
   source: string,
   filePath: string,
   language?: ScriptLanguage,
+  includeLocations = false,
 ): ImportExtractionResult {
   const { result, lazy } = parseSource(source, filePath, language);
 
@@ -295,10 +296,32 @@ function extractSourceImports(
       return codeOrder !== 0 ? codeOrder : compareStrings(left.message, right.message);
     });
 
-    return {
-      imports: references.map(({ reference }) => reference),
-      warnings,
-    };
+    if (!includeLocations) {
+      return { imports: references.map(({ reference }) => reference), warnings };
+    }
+
+    // Oxc offsets are UTF-8 byte offsets, not JavaScript UTF-16 indices.
+    // Build line starts only for explain requests, keeping the normal path unchanged.
+    const bytes = Buffer.from(source);
+    const starts = [0];
+    for (let offset = 0; offset < bytes.length; offset += 1) {
+      if (bytes[offset] === 10) starts.push(offset + 1);
+    }
+    const lines = source.split(/\r?\n/);
+    const imports = references.map(({ reference, start }) => {
+      let low = 0;
+      let high = starts.length - 1;
+      while (low < high) {
+        const mid = Math.ceil((low + high) / 2);
+        if ((starts[mid] ?? 0) <= start) low = mid;
+        else high = mid - 1;
+      }
+      return {
+        ...reference,
+        location: { line: low + 1, code: lines[low]?.trim() ?? "" },
+      };
+    });
+    return { imports, warnings };
   } finally {
     if (lazy) {
       (result as LazyParseResult).dispose();
@@ -310,7 +333,13 @@ export const sourceExtractors: readonly SourceExtractor[] = SOURCE_EXTRACTOR_PLU
   plugin.create(extractSourceImports),
 );
 
-export function extractImports(source: string, filePath: string): ImportExtractionResult {
+export function extractImports(
+  source: string,
+  filePath: string,
+  includeLocations = false,
+): ImportExtractionResult {
   const extractor = sourceExtractors.find((candidate) => candidate.supports(filePath));
-  return extractor ? extractor.extract(source, filePath) : extractSourceImports(source, filePath);
+  return extractor
+    ? extractor.extract(source, filePath, includeLocations)
+    : extractSourceImports(source, filePath, undefined, includeLocations);
 }
