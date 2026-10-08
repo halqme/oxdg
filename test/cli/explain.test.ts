@@ -11,7 +11,7 @@ function run(cwd: string, ...args: string[]) {
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
 
-test("file explanations report only detected source lines and support JSON", async () => {
+test("file explanations report only source locations and support JSON", async () => {
   const cwd = await createFixture({
     "src/a.ts": [
       'const banner = "😀";',
@@ -26,20 +26,15 @@ test("file explanations report only detected source lines and support JSON", asy
     const text = run(cwd, ...args);
     expect(text.status).toBe(0);
     expect(text.stdout).toContain("src/a.ts -> src/core.ts");
-    expect(text.stdout).toContain('src/a.ts:2: import { value } from "./core.js";');
-    expect(text.stdout).toContain('src/a.ts:3: import type { Type } from "./core.js";');
-    expect(text.stdout).not.toContain("const banner");
+    expect(text.stdout).toBe("src/a.ts -> src/core.ts\n  src/a.ts:2\n  src/a.ts:3\n");
 
     const json = run(cwd, ...args, "--json");
     const results = JSON.parse(json.stdout);
     expect(results).toHaveLength(2);
-    expect(results[0]).toMatchObject({
-      from: "src/a.ts",
-      to: "src/core.ts",
-      source: "src/a.ts",
-      line: 2,
-      code: 'import { value } from "./core.js";',
-    });
+    expect(results).toEqual([
+      { from: "src/a.ts", to: "src/core.ts", source: "src/a.ts", line: 2 },
+      { from: "src/a.ts", to: "src/core.ts", source: "src/a.ts", line: 3 },
+    ]);
     const excluded = run(cwd, ...args, "--no-type-imports", "--json");
     expect(JSON.parse(excluded.stdout)).toHaveLength(1);
     expect(run(cwd, "src", "--explain").status).toBe(2);
@@ -85,7 +80,10 @@ test("package explanations preserve multiple source origins and unresolved works
       "packages/app/index.ts",
       "packages/app/other.ts",
     ]);
-    expect(data.every((item: { to: string }) => item.to === "@test/core")).toBe(true);
+    expect(data).toEqual([
+      { from: "@test/app", to: "@test/core", source: "packages/app/index.ts", line: 1 },
+      { from: "@test/app", to: "@test/core", source: "packages/app/other.ts", line: 1 },
+    ]);
 
     const cycles = run(cwd, ".", "--packages", "--circular", "--explain", "--json");
     expect(JSON.parse(cycles.stdout)).toHaveLength(3);
@@ -93,6 +91,22 @@ test("package explanations preserve multiple source origins and unresolved works
       "@test/app",
       "@test/app",
       "@test/core",
+    ]);
+  } finally {
+    await removeFixture(cwd);
+  }
+});
+
+test("deduplicates imports from the same source line for one dependency", async () => {
+  const cwd = await createFixture({
+    "src/entry.ts": 'import "./core.js"; import "./core.js";\n',
+    "src/core.ts": "export {};\n",
+  });
+  try {
+    const result = run(cwd, "src", "--depends", "src/core.ts", "--explain", "--json");
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual([
+      { from: "src/entry.ts", to: "src/core.ts", source: "src/entry.ts", line: 1 },
     ]);
   } finally {
     await removeFixture(cwd);

@@ -6,7 +6,7 @@ export interface ImportReference {
   kind: DependencyKind;
   typeOnly: boolean;
   /** Populated only when source locations are requested. */
-  location?: { line: number; code: string };
+  location?: { line: number };
 }
 
 export interface ImportExtractionResult {

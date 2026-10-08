@@ -12,7 +12,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Explain dependency origins using only the detected import lines via `--depends --explain` and `--circular --explain` in both file and workspace package modes, with optional JSON output.
+- Explain dependency origins using only `path:line` source locations via `--depends --explain` and `--circular --explain` in both file and workspace package modes, with optional JSON output.
 - Generate package-level graphs from actual imports in npm, pnpm, Bun, and Yarn workspaces with `--packages`, including package queries, cycle detection, and all existing output formats.
 
 ### Maintenance

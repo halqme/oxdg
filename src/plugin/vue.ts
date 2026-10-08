@@ -142,7 +142,6 @@ function createVueSourceExtractor(extractScript: ScriptExtractor) {
       return VUE_EXTENSIONS.some((supported) => supported === extension);
     },
     extract(source: string, filePath: string, includeLocations = false) {
-      const lines = includeLocations ? source.split(/\r?\n/) : [];
       const extractions = vueScriptBlocks(source).map((block) => {
         const extraction = extractScript(block.source, filePath, block.language, includeLocations);
         if (!includeLocations) return extraction;
@@ -151,10 +150,9 @@ function createVueSourceExtractor(extractScript: ScriptExtractor) {
           ...extraction,
           imports: extraction.imports.map((reference) => {
             if (!reference.location) return reference;
-            const line = offset + reference.location.line;
             return {
               ...reference,
-              location: { line, code: lines[line - 1]?.trim() ?? reference.location.code },
+              location: { line: offset + reference.location.line },
             };
           }),
         };

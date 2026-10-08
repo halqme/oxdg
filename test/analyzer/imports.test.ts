@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { extractImports } from "../../src/analyzer/imports.ts";
 
 describe("dependency extraction", () => {
-  test("captures only the detected line when requested, including Unicode prefixes", () => {
+  test("captures only line numbers when requested, including Unicode prefixes", () => {
     const source = [
       'const message = "日本語 😀";',
       'import { a } from "./a.js";',
@@ -10,8 +10,8 @@ describe("dependency extraction", () => {
     ].join("\n");
     const result = extractImports(source, "sample.ts", true);
     expect(result.imports.map((item) => item.location)).toEqual([
-      { line: 2, code: 'import { a } from "./a.js";' },
-      { line: 3, code: 'require("./b.js");' },
+      { line: 2 },
+      { line: 3 },
     ]);
     expect(extractImports(source, "sample.ts").imports.every((item) => !item.location)).toBe(true);
   });
@@ -24,10 +24,7 @@ describe("dependency extraction", () => {
       "</script>",
     ].join("\n");
     const result = extractImports(source, "component.vue", true);
-    expect(result.imports[0]?.location).toEqual({
-      line: 3,
-      code: 'import { a } from "./a";',
-    });
+    expect(result.imports[0]?.location).toEqual({ line: 3 });
   });
 
   test("extracts static ESM imports", () => {

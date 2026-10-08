@@ -23,8 +23,6 @@ export interface DependencyExplanation {
   source: string;
   /** 1-based location of the import or re-export. */
   line: number;
-  /** Only the detected source line; no surrounding context. */
-  code: string;
   specifier: string;
   kind: DependencyKind;
   typeOnly: boolean;

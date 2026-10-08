@@ -188,7 +188,6 @@ export async function analyze(
           ...(edge.to === undefined ? {} : { to: edge.to }),
           source: id,
           line: reference.location.line,
-          code: reference.location.code,
           specifier: reference.specifier,
           kind: reference.kind,
           typeOnly: reference.typeOnly,

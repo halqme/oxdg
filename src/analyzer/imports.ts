@@ -306,7 +306,6 @@ function extractSourceImports(
     for (let offset = 0; offset < source.length; offset += 1) {
       if (source.charCodeAt(offset) === 10) starts.push(offset + 1);
     }
-    const lines = source.split(/\r?\n/);
     const imports = references.map(({ reference, start }) => {
       let low = 0;
       let high = starts.length - 1;
@@ -317,7 +316,7 @@ function extractSourceImports(
       }
       return {
         ...reference,
-        location: { line: low + 1, code: lines[low]?.trim() ?? "" },
+        location: { line: low + 1 },
       };
     });
     return { imports, warnings };

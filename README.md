@@ -175,7 +175,15 @@ oxdg . --packages --depends @my-org/core --explain
 oxdg . --packages --circular --explain --json
 ```
 
-Each record shows the importing file, its 1-based line number, and **only the detected source line**. In package mode, multiple source imports may explain a single package-level edge. `--explain --json` emits structured records with source, destination, import kind, specifier, and source-line evidence. Only detected static specifiers are represented; this does not infer why a developer chose an import.
+Explanations report **only the importing source location** as `path:line` (1-based), grouped by dependency. They do not retain or print source code, columns, or surrounding context. Multiple imports on the same line establishing one dependency are listed only once. In package mode, multiple source locations may explain one package-level edge. `--explain --json` emits `from`, `to`, `source`, and `line` fields, without code or specifier metadata. Only detected static specifiers are represented; this does not infer why a developer chose an import.
+
+For example:
+
+```text
+@repo/app -> @repo/core
+  packages/app/src/main.ts:12
+  packages/app/src/router.ts:8
+```
 
 Source evidence is collected only when requested (`analyze(input, { explain: true })` or `analyzePackages(input, { explain: true })`). Regular JSON output is unchanged.
 
