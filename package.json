@@ -58,7 +58,8 @@
     "ignore": "^7.0.10",
     "oxc-parser": "^0.151.0",
     "oxc-resolver": "^11.24.2",
-    "oxc-walker": "^1.1.1"
+    "oxc-walker": "^1.1.1",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",

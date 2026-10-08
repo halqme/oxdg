@@ -153,3 +153,33 @@ test("runs graph queries and fail-on-circular through the CLI", async () => {
     await removeFixture(root);
   }
 });
+
+test("renders workspace package graphs and queries package names", async () => {
+  const root = await createFixture({
+    "package.json": JSON.stringify({ workspaces: ["packages/*"] }),
+    "packages/a/package.json": JSON.stringify({ name: "@test/a" }),
+    "packages/b/package.json": JSON.stringify({ name: "@test/b" }),
+    "packages/a/index.ts": 'import "../b/index.ts";\n',
+    "packages/b/index.ts": 'import "../a/index.ts";\n',
+  });
+  try {
+    const graph = runCli(".", "--cwd", root, "--packages", "--json", "--fail-on-circular");
+    expect(graph.status).toBe(1);
+    expect(graph.stderr).toBe("");
+    expect(JSON.parse(graph.stdout)).toMatchObject({
+      modules: [{ id: "@test/a" }, { id: "@test/b" }],
+      dependencies: [
+        { from: "@test/a", to: "@test/b" },
+        { from: "@test/b", to: "@test/a" },
+      ],
+    });
+    const query = runCli(".", "--cwd", root, "--packages", "--depends", "@test/b", "--json");
+    expect(query.status).toBe(0);
+    expect(JSON.parse(query.stdout)).toEqual(["@test/a"]);
+    const mermaid = runCli(".", "--cwd", root, "--packages", "--mermaid");
+    expect(mermaid.status).toBe(0);
+    expect(mermaid.stdout).toContain("@test/a");
+  } finally {
+    await removeFixture(root);
+  }
+});

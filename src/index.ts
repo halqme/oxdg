@@ -1,4 +1,5 @@
 export { analyze } from "./analyzer/analyze.ts";
+export { analyzePackages } from "./analyzer/packages.ts";
 
 export { findCycles } from "./graph/cycles.ts";
 
