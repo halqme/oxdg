@@ -1,0 +1,9 @@
+{
+  "name": "fixture-workspace-npm",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "!packages/ignored"
+  ],
+  "type": "module"
+}

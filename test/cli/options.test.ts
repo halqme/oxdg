@@ -13,6 +13,7 @@ test("accepts image options on either side of the input and rejects invalid mode
     orphans: false,
     leaves: false,
     failOnCircular: false,
+    packages: false,
     includeNpm: false,
     includeTypeImports: true,
   });

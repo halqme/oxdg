@@ -1,0 +1,11 @@
+{
+  "name": "fixture-workspace-yarn",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "!packages/ignored"
+    ]
+  },
+  "type": "module"
+}

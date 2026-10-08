@@ -86,7 +86,11 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
     }
 
     const { analyze } = await import("../analyzer/analyze.ts");
-    const result = await analyze(cliOptions.paths, analysisOptions);
+    const result = cliOptions.packages
+      ? await (
+          await import("../analyzer/packages.ts")
+        ).analyzePackages(cliOptions.paths, analysisOptions)
+      : await analyze(cliOptions.paths, analysisOptions);
     printWarnings(result.warnings);
     const cycles = cliOptions.circular || cliOptions.failOnCircular ? findCycles(result.graph) : [];
 

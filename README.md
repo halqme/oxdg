@@ -143,6 +143,25 @@ Short aliases include `-c`, `-j`, `-i`, and `-d`. `--rankdir` accepts `LR`, `RL`
 
 Warnings are written to stderr, so structured output on stdout remains usable by scripts and coding agents.
 
+## Workspace package graphs
+
+Generate a graph of actual imports between monorepo packages:
+
+```bash
+oxdg . --packages --image packages.svg
+oxdg . --packages --json
+oxdg . --packages --circular
+oxdg . --packages --depends @my-org/core
+```
+
+Pass the workspace root, not an individual package directory. npm, Bun, and Yarn `package.json` workspaces (arrays or `{ "packages": [...] }`) and pnpm `pnpm-workspace.yaml` package patterns are supported, including negative patterns. Each workspace package must have a unique name. Yarn Plug'n'Play resolution for external dependencies is not supported.
+
+Nodes use package names, including packages with no imports. Edges represent source imports, not `package.json` dependency declarations; imports within the same package are omitted. Package cycles indicate mutual package dependencies, not necessarily a cycle between individual files. Existing renderers, queries, exclusions, and `--no-type-imports` work in this mode. Add `--include-npm` to include resolved external npm packages.
+
+Workspace imports can resolve through package exports or entry points without installed workspace links, but their target files must exist; missing generated files remain unresolved. Files outside workspace packages are not represented. Directory symlinks are not discovered as workspace packages.
+
+The API exposes `analyzePackages(input, options)` with the same result shape as `analyze`.
+
 ## Design
 
 oxdg deliberately leaves parsing and module resolution to Oxc.

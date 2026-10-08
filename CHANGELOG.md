@@ -4,6 +4,16 @@ All notable user-facing and maintenance changes to oxdg are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Generate package-level graphs from actual imports in npm, pnpm, Bun, and Yarn workspaces with `--packages`, including package queries, cycle detection, and all existing output formats.
+
+### Maintenance
+
+- Added checked-in workspace fixtures for npm, pnpm, Bun, and Yarn to verify package graphs, cycles, exclusions, and type-only imports without installed workspace links.
+
 ## [0.5.0] - 2026-10-04
 
 ### Added
