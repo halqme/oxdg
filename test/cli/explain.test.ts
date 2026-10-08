@@ -34,7 +34,10 @@ test("file explanations report only detected source lines and support JSON", asy
     const results = JSON.parse(json.stdout);
     expect(results).toHaveLength(2);
     expect(results[0]).toMatchObject({
-      from: "src/a.ts", to: "src/core.ts", source: "src/a.ts", line: 2,
+      from: "src/a.ts",
+      to: "src/core.ts",
+      source: "src/a.ts",
+      line: 2,
       code: 'import { value } from "./core.js";',
     });
     const excluded = run(cwd, ...args, "--no-type-imports", "--json");
@@ -73,22 +76,23 @@ test("package explanations preserve multiple source origins and unresolved works
     "packages/core/index.ts": 'import "../app/index.ts";\n',
   });
   try {
-    const result = run(
-      cwd, ".", "--packages", "--depends", "@test/core", "--explain", "--json",
-    );
+    const result = run(cwd, ".", "--packages", "--depends", "@test/core", "--explain", "--json");
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
     const data = JSON.parse(result.stdout);
     expect(data).toHaveLength(2);
     expect(data.map((item: { source: string }) => item.source)).toEqual([
-      "packages/app/index.ts", "packages/app/other.ts",
+      "packages/app/index.ts",
+      "packages/app/other.ts",
     ]);
     expect(data.every((item: { to: string }) => item.to === "@test/core")).toBe(true);
 
     const cycles = run(cwd, ".", "--packages", "--circular", "--explain", "--json");
     expect(JSON.parse(cycles.stdout)).toHaveLength(3);
     expect(JSON.parse(cycles.stdout).map((item: { from: string }) => item.from)).toEqual([
-      "@test/app", "@test/app", "@test/core",
+      "@test/app",
+      "@test/app",
+      "@test/core",
     ]);
   } finally {
     await removeFixture(cwd);

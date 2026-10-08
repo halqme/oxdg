@@ -41,7 +41,8 @@ function summary(numbers) {
   return { medianMs: Number(median.toFixed(2)), p95Ms: Number(p95.toFixed(2)) };
 }
 for (const test of cases) {
-  const baseline = [], explained = [];
+  const baseline = [],
+    explained = [];
   for (let index = 0; index < 4; index++) {
     runCase(test, false);
     runCase(test, true);
