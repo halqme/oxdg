@@ -6,6 +6,12 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Maintenance
+
+- Prepared the v0.5.1 release and updated changelog links.
+
+## [0.5.1] - 2026-10-10
+
 ### Fixed
 
 - Keep routed SVG edges inside the viewport with bottom padding.
@@ -121,7 +127,9 @@ The project follows [Semantic Versioning](https://semver.org/).
 - Text, JSON, Mermaid, D2, and standalone SVG output.
 - Public analysis and rendering API.
 
-[Unreleased]: https://github.com/halqme/oxdg/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/halqme/oxdg/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/halqme/oxdg/releases/tag/v0.5.1
+[0.5.0]: https://github.com/halqme/oxdg/releases/tag/v0.5.0
 [0.4.2]: https://github.com/halqme/oxdg/releases/tag/v0.4.2
 [0.4.1]: https://github.com/halqme/oxdg/releases/tag/v0.4.1
 [0.4.0]: https://github.com/halqme/oxdg/releases/tag/v0.4.0
