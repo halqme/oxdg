@@ -23,36 +23,30 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: voidzero-dev/setup-vp@6eb3ef76e48ad5aca2d217e4ee277786b3865699
         with:
-          node-version: 24.x
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: 1.4.2
+          cache: true
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: vp install --frozen-lockfile
 
       - name: Type check
-        run: bun run check
+        run: vp run check
 
       - name: Lint
-        run: bun run lint
+        run: vp run lint
 
       - name: Check formatting
-        run: bun run format:check
+        run: vp run format:check
 
       - name: Test
-        run: bun run test
+        run: vp run test
 
       - name: Build
-        run: bun run build
+        run: vp run build
 
       - name: Check package and report footprint
-        run: bun run release:check -- --report package-footprint.json --summary "$GITHUB_STEP_SUMMARY"
+        run: vp run release:check -- --report package-footprint.json --summary "$GITHUB_STEP_SUMMARY"
 
       - name: Benchmark explain query overhead
         run: node scripts/benchmark-explain.mjs --runs 15

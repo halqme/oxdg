@@ -10,6 +10,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 - Grouped minor and patch GitHub Actions updates in Dependabot pull requests.
 - The minimum required Node.js version is v22.23.4. See [Node.js — Wednesday, October 21, 2026 Security Releases](https://nodejs.org/ja/blog/vulnerability/october-2026-security-releases).
+- Standardized benchmark, PR metrics, and release verification workflows on Vite Plus while keeping the Node.js compatibility matrix explicit.
 
 ## [0.5.1] - 2026-10-10
 
