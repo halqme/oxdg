@@ -15,7 +15,7 @@ Security vulnerabilities should follow [SECURITY.md](SECURITY.md), not the publi
 Requirements:
 
 - Node.js 22 or newer
-- Bun 1.4.2
+- The current Bun release
 
 Install dependencies:
 

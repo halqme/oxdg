@@ -3,7 +3,7 @@
 ## Project
 
 - `oxdg` is a modern CLI tool for analyzing JavaScript and TypeScript module dependencies, inspired by madge.
-- The project is an ESM TypeScript package. Use Node.js 22 or newer for the published CLI and Bun 1.4.2 for development commands.
+- The project is an ESM TypeScript package. Use Node.js 22 or newer for the published CLI and the current Bun release for development commands.
 - Keep relative TypeScript imports explicit with their `.ts` extension, matching the existing `NodeNext` configuration.
 
 ## Repository layout

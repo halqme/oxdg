@@ -97,7 +97,7 @@ function metadata() {
     },
     runtimes: {
       node: { requested: "24.x", actual: "v24.0.0" },
-      bun: { requested: "1.4.2", actual: "1.4.2" },
+      bun: "1.0.0",
       npm: "11.0.0",
       hyperfine: { requested: "1.19.0", actual: "hyperfine 1.19.0" },
     },
