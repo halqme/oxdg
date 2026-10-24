@@ -423,10 +423,7 @@ const metadata = {
   },
   runtimes: {
     node: { requested: process.env.NODE_VERSION ?? "unknown", actual: process.version },
-    bun: {
-      requested: process.env.BUN_VERSION ?? "unknown",
-      actual: readCommand("bun", ["--version"]),
-    },
+    bun: readCommand("bun", ["--version"]),
     npm: readCommand("npm", ["--version"]),
     hyperfine: {
       requested: process.env.HYPERFINE_VERSION ?? "unknown",

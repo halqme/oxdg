@@ -138,7 +138,7 @@ test("records released and main revisions against both benchmark corpora", async
       join(fakeBin, "lscpu"),
       'console.log(JSON.stringify({ lscpu: [{ field: "CPU(s):", data: "2" }] }));\n',
     );
-    await writeExecutable(join(fakeBin, "bun"), 'console.log("1.4.2");\n');
+    await writeExecutable(join(fakeBin, "bun"), 'console.log("1.0.0");\n');
 
     const result = spawnSync(
       "node",
@@ -172,7 +172,6 @@ test("records released and main revisions against both benchmark corpora", async
           WEBPACK_REPOSITORY: "https://github.com/webpack/webpack.git",
           RUNNER_LABEL: "ubuntu-latest",
           NODE_VERSION: "24.x",
-          BUN_VERSION: "1.4.2",
           HYPERFINE_VERSION: "1.19.0",
         },
       },
