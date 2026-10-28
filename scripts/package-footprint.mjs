@@ -125,6 +125,7 @@ export async function runPackageFootprint() {
     }
     for (const requiredPath of [
       "LICENSE",
+      "dist/THIRD_PARTY_LICENSES",
       "README.md",
       "package.json",
       "dist/index.js",
@@ -146,6 +147,13 @@ export async function runPackageFootprint() {
     );
     await writeFile(join(consumer, "src", "a.ts"), 'import "./b.js";\n', "utf8");
     await writeFile(join(consumer, "src", "b.ts"), 'import "./a.js";\n', "utf8");
+    await mkdir(join(consumer, "packages", "example"), { recursive: true });
+    await writeFile(join(consumer, "pnpm-workspace.yaml"), 'packages:\n  - "packages/*"\n');
+    await writeFile(
+      join(consumer, "packages", "example", "package.json"),
+      JSON.stringify({ name: "example", version: "1.0.0" }),
+    );
+    await writeFile(join(consumer, "packages", "example", "index.ts"), "export const x = 1;\n");
 
     await run(
       npm,
@@ -188,6 +196,31 @@ export async function runPackageFootprint() {
     if (!Array.isArray(jsonGraph.modules) || !Array.isArray(jsonGraph.dependencies)) {
       throw new Error("packed CLI produced an invalid JSON graph");
     }
+    const { stdout: excludedOutput } = await run(
+      "npx",
+      ["--no-install", "oxdg", "./src", "--exclude", "src/b.ts", "--json"],
+      consumer,
+    );
+    if (JSON.parse(excludedOutput).modules.some(({ id }) => id.endsWith("b.ts"))) {
+      throw new Error("packed CLI did not exclude the requested module");
+    }
+    const { stdout: workspaceOutput } = await run(
+      "npx",
+      ["--no-install", "oxdg", ".", "--packages", "--json"],
+      consumer,
+    );
+    if (!JSON.parse(workspaceOutput).modules.some(({ id }) => id === "example")) {
+      throw new Error("packed CLI did not discover the pnpm workspace package");
+    }
+    await run(
+      "node",
+      [
+        "--input-type=module",
+        "-e",
+        'import { analyze } from "oxdg"; const result = await analyze("./src"); if (result.graph.nodes.size !== 2) throw new Error("Invalid API graph");',
+      ],
+      consumer,
+    );
     await run("npx", ["--no-install", "oxdg", "./src/a.ts", "--image", "graph.svg"], consumer);
     await run(
       "bunx",

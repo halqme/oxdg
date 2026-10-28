@@ -1,4 +1,5 @@
 import { defineConfig } from "vite-plus";
+import { bundledLicenses } from "./scripts/bundled-licenses.ts";
 
 export default defineConfig({
   staged: {
@@ -12,7 +13,7 @@ export default defineConfig({
     format: "esm",
     platform: "node",
     dts: true,
-    sourcemap: true,
+    sourcemap: false,
     clean: true,
     // Keep the emitted names aligned with package.json's .js/.d.ts exports.
     fixedExtension: false,
@@ -21,9 +22,12 @@ export default defineConfig({
       // Remove to preserve subpath imports as written (the new default).
       // https://tsdown.dev/options/dependencies#deps-resolvedepsubpath
       resolveDepSubpath: true,
-      neverBundle: ["@dagrejs/dagre", "oxc-parser", "oxc-resolver", "oxc-walker"],
+      alwaysBundle: ["@dagrejs/dagre", "commander", "ignore", "yaml"],
+      neverBundle: ["oxc-parser", "oxc-resolver", "oxc-walker"],
     },
     minify: true,
+    plugins: [bundledLicenses()],
+    treeshake: true,
   },
   fmt: {
     ignorePatterns: [],
