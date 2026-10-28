@@ -58,6 +58,84 @@ describe("module resolution", () => {
       });
     });
 
+    test("resolves extensionless CommonJS TypeScript requires", async () => {
+      const root = await createFixture({
+        "src/index.ts": 'require("./target");',
+        "src/target.ts": "export const target = true;",
+      });
+
+      try {
+        const result = await analyze("src/index.ts", { cwd: root });
+        expectEdge(result, {
+          from: "src/index.ts",
+          specifier: "./target",
+          kind: "require",
+          to: "src/target.ts",
+          status: "internal",
+        });
+      } finally {
+        await removeFixture(root);
+      }
+    });
+
+    test.each(["require", "require.resolve"])(
+      "preserves TypeScript resolution and require conditions for %s",
+      async (call) => {
+        const root = await createFixture({
+          "src/index.ts": [
+            `${call}("./target.js");`,
+            `${call}("./directory");`,
+            `${call}("#conditional");`,
+            `${call}("#import-only");`,
+          ].join("\n"),
+          "src/target.ts": "export const target = true;",
+          "src/directory/package.json": JSON.stringify({
+            main: "./entry",
+            imports: { "#conditional": { import: "./esm.js", require: "./cjs.js" } },
+          }),
+          "src/directory/esm.ts": "export const esm = true;",
+          "src/directory/cjs.ts": "export const cjs = true;",
+          "src/directory/entry.ts": 'require("#conditional");',
+          "package.json": JSON.stringify({
+            imports: {
+              "#conditional": { import: "./src/esm.js", require: "./src/cjs.js" },
+              "#import-only": { import: "./src/esm.js" },
+            },
+          }),
+          "src/esm.ts": "export const esm = true;",
+          "src/cjs.ts": "export const cjs = true;",
+        });
+
+        try {
+          const result = await analyze("src/index.ts", { cwd: root });
+          const kind = call === "require" ? "require" : "require-resolve";
+          for (const [specifier, to] of [
+            ["./target.js", "src/target.ts"],
+            ["./directory", "src/directory/entry.ts"],
+            ["#conditional", "src/cjs.ts"],
+          ] as const) {
+            expectEdge(result, { from: "src/index.ts", specifier, kind, to, status: "internal" });
+          }
+          expectEdge(result, {
+            from: "src/directory/entry.ts",
+            specifier: "#conditional",
+            kind: "require",
+            to: "src/directory/cjs.ts",
+            status: "internal",
+          });
+          expectEdge(result, {
+            from: "src/index.ts",
+            specifier: "#import-only",
+            kind,
+            status: "unresolved",
+          });
+          expect(result.graph.nodes.has("src/esm.ts")).toBe(false);
+        } finally {
+          await removeFixture(root);
+        }
+      },
+    );
+
     test("resolves CommonJS require dependencies from .cjs modules", async () => {
       const result = await analyzeFixture("basic-esm", "src/legacy.cjs");
 

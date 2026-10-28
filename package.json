@@ -47,6 +47,7 @@
     "format": "vp fmt --write .",
     "format:check": "vp fmt --check .",
     "test": "bun test",
+    "test:madge-compat": "bun test/madge-compat/run.ts",
     "dev": "bun run src/cli/main.ts",
     "release:check": "node scripts/check-pack.mjs",
     "prepack": "bun run build",
