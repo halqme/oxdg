@@ -1,0 +1,3 @@
+# These are inert upstream resolver fixtures, not installed dependencies.
+!upstream/test/cjs/node_modules/
+!upstream/test/cjs/node_modules/*.js

@@ -71,6 +71,8 @@ The table below focuses on documented capabilities rather than overall ratings. 
 
 `module-graph` refers to `@thepassle/module-graph`; its documented analyzer is ESM-oriented and does not analyze `require()`.
 
+The [Madge v8.0.0 compatibility corpus](test/madge-compat/README.md) preserves the complete upstream test and fixture inventory, with runnable comparisons against upstream expectations. `bun run test:madge-compat` reports matches, differences, unsupported contracts, and execution errors separately; it currently fails on known differences. This is not a claim of drop-in compatibility.
+
 ## One-shot CLI
 
 Analyze a file or directory:

@@ -5,5 +5,5 @@
     "types": ["node", "bun"]
   },
   "include": ["./**/*.ts"],
-  "exclude": ["./fixtures"]
+  "exclude": ["./fixtures", "./madge-compat/upstream"]
 }

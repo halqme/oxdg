@@ -1,9 +1,18 @@
+import { relative } from "node:path";
 import { defineConfig } from "vite-plus";
 import { bundledLicenses } from "./scripts/bundled-licenses.ts";
 
 export default defineConfig({
   staged: {
-    "*": "vp check --fix",
+    "*": (files) => {
+      // Preserve upstream bytes and syntax outside this project's lint contract.
+      const targets = files.filter(
+        (file) => !relative(import.meta.dirname, file).startsWith("test/madge-compat/upstream/"),
+      );
+      return targets.length
+        ? `vp check --fix ${targets.map((file) => JSON.stringify(file)).join(" ")}`
+        : [];
+    },
   },
   pack: {
     entry: {
@@ -30,7 +39,7 @@ export default defineConfig({
     treeshake: true,
   },
   fmt: {
-    ignorePatterns: [],
+    ignorePatterns: ["test/madge-compat/upstream/**"],
   },
   lint: {
     plugins: ["typescript", "unicorn", "oxc"],

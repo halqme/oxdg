@@ -1,0 +1,973 @@
+[
+  {
+    "id": "amd:01",
+    "source": "test/amd.js",
+    "line": 10,
+    "title": "finds recursive dependencies",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["sub/b.js"],
+      "sub/b.js": ["sub/c.js"],
+      "sub/c.js": ["d.js"],
+      "d.js": []
+    },
+    "cwd": "amd/ok",
+    "input": "a.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:02",
+    "source": "test/amd.js",
+    "line": 22,
+    "title": "ignores plugins",
+    "operation": "graph",
+    "expected": {
+      "plugin.js": ["ok/d.js"],
+      "ok/d.js": []
+    },
+    "cwd": "amd",
+    "input": "plugin.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:03",
+    "source": "test/amd.js",
+    "line": 32,
+    "title": "finds nested dependencies",
+    "operation": "graph",
+    "expected": {
+      "a.js": [],
+      "b.js": [],
+      "main.js": ["a.js", "b.js"]
+    },
+    "cwd": "amd/nested",
+    "input": "main.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:04",
+    "source": "test/amd.js",
+    "line": 46,
+    "title": "finds circular dependencies",
+    "operation": "cycles",
+    "expected": [
+      ["a.js", "c.js"],
+      ["f.js", "g.js", "h.js"]
+    ],
+    "cwd": "amd/circular",
+    "input": "main.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:05",
+    "source": "test/amd.js",
+    "line": 56,
+    "title": "finds circular dependencies with relative paths",
+    "operation": "cycles",
+    "expected": [["a.js", "foo/b.js"]],
+    "cwd": "amd/circularRelative",
+    "input": "a.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:06",
+    "source": "test/amd.js",
+    "line": 63,
+    "title": "finds circular dependencies with alias",
+    "operation": "cycles",
+    "expected": [["dos.js", "x86.js"]],
+    "cwd": "amd/circularAlias",
+    "input": "dos.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:07",
+    "source": "test/amd.js",
+    "line": 72,
+    "title": "works for files with ES6 code inside",
+    "operation": "graph",
+    "expected": {
+      "amdes6.js": ["ok/d.js"],
+      "ok/d.js": []
+    },
+    "cwd": "amd",
+    "input": "amdes6.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:08",
+    "source": "test/amd.js",
+    "line": 82,
+    "title": "uses paths found in RequireJS config",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["vendor/jquery-2.0.3.js"],
+      "vendor/jquery-2.0.3.js": []
+    },
+    "cwd": "amd/requirejs",
+    "input": "a.js",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "amd:09",
+    "source": "test/amd.js",
+    "line": 94,
+    "title": "returns modules that no one is depending on",
+    "operation": "orphans",
+    "expected": ["a.js", "c.js"],
+    "cwd": "amd/requirejs",
+    "input": "orphans",
+    "disposition": "unsupported",
+    "reason": "AMD dependency extraction and RequireJS configuration are not supported by oxdg."
+  },
+  {
+    "id": "api:01",
+    "source": "test/api.js",
+    "line": 12,
+    "title": "throws error on missing path argument",
+    "disposition": "unsupported",
+    "reason": "Madge synchronously throws its own missing-argument error; oxdg requires a typed input and has an async API."
+  },
+  {
+    "id": "api:02",
+    "source": "test/api.js",
+    "line": 18,
+    "title": "returns a Promise",
+    "disposition": "compare",
+    "cwd": "cjs",
+    "input": "a.js",
+    "operation": "promise",
+    "expected": true,
+    "baseline": "match"
+  },
+  {
+    "id": "api:03",
+    "source": "test/api.js",
+    "line": 22,
+    "title": "throws error if file or directory does not exists",
+    "disposition": "compare",
+    "cwd": "",
+    "input": "missing.js",
+    "operation": "missing",
+    "expected": "no such file or directory",
+    "baseline": "difference",
+    "difference": "Missing-input-path error wording differs."
+  },
+  {
+    "id": "api:04",
+    "source": "test/api.js",
+    "line": 29,
+    "title": "takes single file as path",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["b.js", "c.js"],
+      "b.js": ["c.js"],
+      "c.js": []
+    },
+    "disposition": "compare",
+    "cwd": "cjs",
+    "input": "a.js",
+    "baseline": "match"
+  },
+  {
+    "id": "api:05",
+    "source": "test/api.js",
+    "line": 40,
+    "title": "takes an array of files as path and combines the result",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["b.js", "c.js"],
+      "b.js": ["c.js"],
+      "c.js": [],
+      "normal/d.js": []
+    },
+    "disposition": "compare",
+    "cwd": "cjs",
+    "input": ["a.js", "normal/d.js"],
+    "baseline": "match"
+  },
+  {
+    "id": "api:06",
+    "source": "test/api.js",
+    "line": 52,
+    "title": "take a single directory as path and find files in it",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["sub/b.js"],
+      "d.js": [],
+      "sub/b.js": ["sub/c.js"],
+      "sub/c.js": ["d.js"]
+    },
+    "disposition": "compare",
+    "cwd": "cjs/normal",
+    "input": ".",
+    "baseline": "match"
+  },
+  {
+    "id": "api:07",
+    "source": "test/api.js",
+    "line": 64,
+    "title": "takes an array of directories as path and compute the basedir correctly",
+    "operation": "graph",
+    "expected": {
+      "1/a.js": [],
+      "2/b.js": []
+    },
+    "disposition": "compare",
+    "cwd": "cjs/multibase",
+    "input": ["1", "2"],
+    "baseline": "match"
+  },
+  {
+    "id": "api:08",
+    "source": "test/api.js",
+    "line": 74,
+    "title": "takes a predefined tree",
+    "operation": "graph",
+    "expected": {
+      "a": ["b", "c", "d"],
+      "b": ["c"],
+      "c": [],
+      "d": ["a"]
+    },
+    "disposition": "unsupported",
+    "reason": "Predefined dependency-tree input is not accepted by analyze()."
+  },
+  {
+    "id": "api:09",
+    "source": "test/api.js",
+    "line": 91,
+    "title": "can exclude modules using RegExp",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["c.js"],
+      "c.js": []
+    },
+    "disposition": "unsupported",
+    "reason": "Madge excludeRegExp is not equivalent to oxdg gitignore patterns."
+  },
+  {
+    "id": "api:10",
+    "source": "test/api.js",
+    "line": 103,
+    "title": "extracts dependencies but excludes .git",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["b.js", "c.js"],
+      "b.js": ["c.js"],
+      "c.js": []
+    },
+    "disposition": "compare",
+    "cwd": "git",
+    "input": "a.js",
+    "setup": "git-directory",
+    "baseline": "difference",
+    "difference": "Explicit imports into .git are followed by oxdg."
+  },
+  {
+    "id": "api:11",
+    "source": "test/api.js",
+    "line": 123,
+    "title": "will stop traversing when returning false",
+    "operation": "graph",
+    "expected": {
+      "a.js": []
+    },
+    "disposition": "unsupported",
+    "reason": "No traversal dependencyFilter callback API."
+  },
+  {
+    "id": "api:12",
+    "source": "test/api.js",
+    "line": 136,
+    "title": "will not stop traversing when not returning anything",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["b.js", "c.js"],
+      "b.js": ["c.js"],
+      "c.js": []
+    },
+    "disposition": "unsupported",
+    "reason": "No traversal dependencyFilter callback API."
+  },
+  {
+    "id": "api:13",
+    "source": "test/api.js",
+    "line": 149,
+    "title": "will pass arguments to the function",
+    "disposition": "unsupported",
+    "reason": "No traversal dependencyFilter callback API."
+  },
+  {
+    "id": "api:14",
+    "source": "test/api.js",
+    "line": 181,
+    "title": "returns dependency object",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["b.js", "c.js"],
+      "b.js": ["c.js"],
+      "c.js": []
+    },
+    "disposition": "compare",
+    "cwd": "cjs",
+    "input": "a.js",
+    "baseline": "match"
+  },
+  {
+    "id": "api:15",
+    "source": "test/api.js",
+    "line": 194,
+    "title": "returns list of circular dependencies",
+    "operation": "cycles",
+    "expected": [["a.js", "d.js"]],
+    "disposition": "compare",
+    "cwd": "cjs/circular",
+    "input": "a.js",
+    "baseline": "match"
+  },
+  {
+    "id": "api:16",
+    "source": "test/api.js",
+    "line": 205,
+    "title": "returns graph with only circular dependencies",
+    "operation": "cyclicGraph",
+    "expected": {
+      "a.js": ["d.js"],
+      "d.js": ["a.js"]
+    },
+    "disposition": "compare",
+    "cwd": "cjs/circular",
+    "input": "a.js",
+    "baseline": "match"
+  },
+  {
+    "id": "api:17",
+    "source": "test/api.js",
+    "line": 217,
+    "title": "returns an array of skipped files",
+    "operation": "warnings",
+    "expected": {
+      "graph": {
+        "missing.js": ["c.js"],
+        "c.js": []
+      },
+      "warnings": {
+        "skipped": ["./path/non/existing/file"]
+      }
+    },
+    "disposition": "compare",
+    "cwd": "cjs",
+    "input": "missing.js",
+    "baseline": "difference",
+    "difference": "Native warning arrays differ from Madge skipped-file objects."
+  },
+  {
+    "id": "api:18",
+    "source": "test/api.js",
+    "line": 232,
+    "title": "returns a promise resolved with graphviz DOT output",
+    "disposition": "unsupported",
+    "reason": "Graphviz DOT rendering and Madge styling are not implemented."
+  },
+  {
+    "id": "api:19",
+    "source": "test/api.js",
+    "line": 244,
+    "title": "returns modules that depends on another",
+    "operation": "dependents",
+    "expected": ["a.js", "b.js"],
+    "disposition": "compare",
+    "cwd": "cjs",
+    "input": "a.js",
+    "module": "c.js",
+    "baseline": "match"
+  },
+  {
+    "id": "api:20",
+    "source": "test/api.js",
+    "line": 253,
+    "title": "returns modules that no one is depending on",
+    "operation": "orphans",
+    "expected": ["a.js"],
+    "disposition": "compare",
+    "cwd": "cjs/normal",
+    "input": ".",
+    "baseline": "match"
+  },
+  {
+    "id": "api:21",
+    "source": "test/api.js",
+    "line": 262,
+    "title": "returns modules that have no dependencies",
+    "operation": "leaves",
+    "expected": ["d.js"],
+    "disposition": "compare",
+    "cwd": "cjs/normal",
+    "input": ".",
+    "baseline": "match"
+  },
+  {
+    "id": "api:22",
+    "source": "test/api.js",
+    "line": 271,
+    "title": "returns a promise resolved with XML SVG output in a Buffer",
+    "disposition": "unsupported",
+    "reason": "No Madge async SVG Buffer API; oxdg renders SVG strings with its own renderer."
+  },
+  {
+    "id": "api:23",
+    "source": "test/api.js",
+    "line": 294,
+    "title": "rejects if a filename is not supplied",
+    "disposition": "unsupported",
+    "reason": "No Madge image() API or imagePath validation."
+  },
+  {
+    "id": "api:24",
+    "source": "test/api.js",
+    "line": 303,
+    "title": "rejects on unsupported image format",
+    "disposition": "unsupported",
+    "reason": "No Madge image() format negotiation."
+  },
+  {
+    "id": "api:25",
+    "source": "test/api.js",
+    "line": 312,
+    "title": "rejects if graphviz is not installed",
+    "disposition": "unsupported",
+    "reason": "No Graphviz subprocess API or graphVizPath setting."
+  },
+  {
+    "id": "api:26",
+    "source": "test/api.js",
+    "line": 321,
+    "title": "writes image to file",
+    "disposition": "unsupported",
+    "reason": "No Madge image() file-writing API or PNG renderer."
+  },
+  {
+    "id": "cjs:01",
+    "source": "test/cjs.js",
+    "line": 10,
+    "title": "finds recursive dependencies",
+    "operation": "graph",
+    "expected": {
+      "a.js": ["sub/b.js"],
+      "d.js": [],
+      "sub/b.js": ["sub/c.js"],
+      "sub/c.js": ["d.js"]
+    },
+    "cwd": "cjs/normal",
+    "input": "a.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "cjs:02",
+    "source": "test/cjs.js",
+    "line": 22,
+    "title": "handles path outside directory",
+    "operation": "graph",
+    "expected": {
+      "../d.js": [],
+      "c.js": ["../d.js"]
+    },
+    "cwd": "cjs/normal/sub",
+    "input": "c.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "cjs:03",
+    "source": "test/cjs.js",
+    "line": 32,
+    "title": "finds circular dependencies",
+    "operation": "cycles",
+    "expected": [["a.js", "d.js"]],
+    "cwd": "cjs/circular",
+    "input": "a.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "cjs:04",
+    "source": "test/cjs.js",
+    "line": 41,
+    "title": "handle extensions when finding circular dependencies",
+    "operation": "cycles",
+    "expected": [],
+    "cwd": "cjs/circular",
+    "input": "foo.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "cjs:05",
+    "source": "test/cjs.js",
+    "line": 48,
+    "title": "excludes core modules by default",
+    "operation": "graph",
+    "expected": {
+      "core.js": []
+    },
+    "cwd": "cjs",
+    "input": "core.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "cjs:06",
+    "source": "test/cjs.js",
+    "line": 57,
+    "title": "excludes NPM modules by default",
+    "operation": "graph",
+    "expected": {
+      "normal/d.js": [],
+      "npm.js": ["normal/d.js"]
+    },
+    "cwd": "cjs",
+    "input": "npm.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "cjs:07",
+    "source": "test/cjs.js",
+    "line": 67,
+    "title": "can include shallow NPM modules",
+    "operation": "graph",
+    "expected": {
+      "normal/d.js": [],
+      "npm.js": ["node_modules/a.js", "normal/d.js"]
+    },
+    "cwd": "cjs",
+    "input": "npm.js",
+    "disposition": "compare",
+    "options": {
+      "includeNpm": true
+    },
+    "baseline": "difference",
+    "difference": "oxdg represents npm package nodes rather than shallow file paths."
+  },
+  {
+    "id": "es6:01",
+    "source": "test/es6.js",
+    "line": 10,
+    "title": "extracts dependencies",
+    "operation": "graph",
+    "expected": {
+      "absolute.js": ["absolute/a.js"],
+      "absolute/a.js": []
+    },
+    "cwd": "es6",
+    "input": "absolute.js",
+    "disposition": "compare",
+    "baseline": "difference",
+    "difference": "Madge base-directory bare import resolution is not reproduced."
+  },
+  {
+    "id": "es6:02",
+    "source": "test/es6.js",
+    "line": 20,
+    "title": "finds circular dependencies",
+    "operation": "cycles",
+    "expected": [["a.js", "b.js", "c.js"]],
+    "cwd": "es6/circular",
+    "input": "a.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "es6:03",
+    "source": "test/es6.js",
+    "line": 29,
+    "title": "tackles error in files",
+    "operation": "graph",
+    "expected": {
+      "error.js": []
+    },
+    "cwd": "es6",
+    "input": "error.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "es6:04",
+    "source": "test/es6.js",
+    "line": 38,
+    "title": "supports export x from \"./file\"",
+    "operation": "graph",
+    "expected": {
+      "a.js": [],
+      "b-default.js": ["a.js"],
+      "b-named.js": ["a.js"],
+      "b-star.js": ["a.js"],
+      "c.js": ["b-default.js", "b-named.js", "b-star.js"]
+    },
+    "cwd": "es6/re-export",
+    "input": "c.js",
+    "disposition": "compare",
+    "baseline": "difference",
+    "difference": "Oxc rejects the export-default-from proposal syntax."
+  },
+  {
+    "id": "es6:05",
+    "source": "test/es6.js",
+    "line": 55,
+    "title": "supports resolve root paths in webpack config",
+    "operation": "graph",
+    "expected": {
+      "index.js": ["rel.js"],
+      "abs.js": [],
+      "rel.js": ["abs.js"]
+    },
+    "cwd": "es6/webpack/src/sub",
+    "input": "index.js",
+    "disposition": "unsupported",
+    "reason": "Webpack resolve.root configuration is not supported; no tsconfig substitution is made."
+  },
+  {
+    "id": "es7:01",
+    "source": "test/es7.js",
+    "line": 10,
+    "title": "extracts dependencies",
+    "operation": "graph",
+    "expected": {
+      "other.js": [],
+      "async.js": ["other.js"]
+    },
+    "cwd": "es7",
+    "input": "async.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "flow:01",
+    "source": "test/flow.js",
+    "line": 10,
+    "title": "extracts ES module ependencies",
+    "operation": "graph",
+    "expected": {
+      "math.js": [],
+      "calc.js": ["math.js"]
+    },
+    "cwd": "flow/es",
+    "input": "calc.js",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "flow:02",
+    "source": "test/flow.js",
+    "line": 20,
+    "title": "extracts CommonsJS module dependencies",
+    "operation": "graph",
+    "expected": {
+      "geometry.js": [],
+      "calc.js": ["geometry.js"]
+    },
+    "cwd": "flow/cjs",
+    "input": "calc.js",
+    "disposition": "compare",
+    "baseline": "difference",
+    "difference": "Oxc rejects this Flow import-type syntax."
+  },
+  {
+    "id": "flow:03",
+    "source": "test/flow.js",
+    "line": 30,
+    "title": "extracts CommonsJS module dependencies with mixed import syntax",
+    "operation": "graph",
+    "expected": {
+      "geometry.js": [],
+      "math.js": [],
+      "calc.js": ["geometry.js", "math.js"]
+    },
+    "cwd": "flow/cjs",
+    "input": "calc.js",
+    "disposition": "compare",
+    "scope": "Dependency graph only: oxdg has mixed import extraction by default, not the Madge detectiveOptions API.",
+    "baseline": "difference",
+    "difference": "Oxc rejects this Flow import-type syntax."
+  },
+  {
+    "id": "jsx:01",
+    "source": "test/jsx.js",
+    "line": 10,
+    "title": "finds import in JSX files",
+    "operation": "graph",
+    "expected": {
+      "basic.jsx": ["other.jsx"],
+      "other.jsx": []
+    },
+    "cwd": "jsx",
+    "input": "basic.jsx",
+    "disposition": "compare",
+    "baseline": "match"
+  },
+  {
+    "id": "typescript:01",
+    "source": "test/typescript.js",
+    "line": 11,
+    "title": "extracts module dependencies",
+    "operation": "graph",
+    "expected": {
+      "import.ts": ["require-x.tsx", "require.ts"],
+      "require.ts": ["export.ts"],
+      "require-x.tsx": ["export-x.tsx", "export.ts"],
+      "export.ts": [],
+      "export-x.tsx": []
+    },
+    "cwd": "typescript",
+    "input": "import.ts",
+    "disposition": "compare",
+    "baseline": "difference",
+    "difference": "TypeScript import-equals dependency is not extracted."
+  },
+  {
+    "id": "typescript:02",
+    "source": "test/typescript.js",
+    "line": 24,
+    "title": "reads paths from a custom tsConfig",
+    "operation": "graph",
+    "expected": {
+      "import.ts": ["subfolder/index.ts", "subfolder/require.tsx"],
+      "subfolder/index.ts": [],
+      "subfolder/require.tsx": ["subfolder2/export.ts"],
+      "subfolder2/export.ts": []
+    },
+    "cwd": "typescript/custom-paths",
+    "input": "import.ts",
+    "disposition": "unsupported",
+    "reason": "Object-valued tsConfig is unsupported; writing an equivalent config file would not test this API."
+  },
+  {
+    "id": "typescript:03",
+    "source": "test/typescript.js",
+    "line": 46,
+    "title": "got tsConfig as a string, \"extends\" field is interpreted",
+    "cwd": "typescript/custom-paths",
+    "input": "import.ts",
+    "disposition": "unsupported",
+    "reason": "Madge exposes its parsed TypeScript config object; oxdg does not expose res.config."
+  },
+  {
+    "id": "typescript:04",
+    "source": "test/typescript.js",
+    "line": 61,
+    "title": "supports CJS modules when using mixedImports option",
+    "operation": "graph",
+    "expected": {
+      "export-x.tsx": [],
+      "export.ts": [],
+      "mixed.ts": ["export-x.tsx", "export.ts"]
+    },
+    "cwd": "typescript",
+    "input": "mixed.ts",
+    "disposition": "compare",
+    "scope": "Dependency graph only: oxdg has mixed import extraction by default, not the Madge detectiveOptions API.",
+    "baseline": "difference",
+    "difference": "CommonJS extensionless TypeScript require is unresolved."
+  },
+  {
+    "id": "vue:01",
+    "source": "test/vue.js",
+    "line": 12,
+    "title": "finds import in Vue files using TS",
+    "operation": "graph",
+    "expected": {
+      "one.ts": [],
+      "BasicComponentTs.vue": ["OneNestedTs.vue", "TwoNested.vue"],
+      "OneNestedTs.vue": ["ThreeNested.vue", "one.ts"],
+      "ThreeNested.vue": [],
+      "TwoNested.vue": []
+    },
+    "cwd": "vue",
+    "input": "BasicComponentTs.vue",
+    "disposition": "compare",
+    "scope": "Dependency graph only: Madge empty object tsConfig is omitted; oxdg Vue support uses its built-in extractor.",
+    "baseline": "match"
+  },
+  {
+    "id": "vue:02",
+    "source": "test/vue.js",
+    "line": 25,
+    "title": "finds import in Vue files",
+    "operation": "graph",
+    "expected": {
+      "two.js": [],
+      "BasicComponent.vue": ["OneNested.vue", "TwoNested.vue"],
+      "OneNested.vue": ["ThreeNested.vue", "two.js"],
+      "ThreeNested.vue": [],
+      "TwoNested.vue": []
+    },
+    "cwd": "vue",
+    "input": "BasicComponent.vue",
+    "disposition": "compare",
+    "scope": "Dependency graph only: Madge empty object tsConfig is omitted; oxdg Vue support uses its built-in extractor.",
+    "baseline": "match"
+  },
+  {
+    "id": "output:01",
+    "source": "test/output.sh",
+    "line": 8,
+    "title": "LIST",
+    "command": "./bin/cli.js lib/api.js",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:02",
+    "source": "test/output.sh",
+    "line": 11,
+    "title": "SUMMARY",
+    "command": "./bin/cli.js lib/api.js -s",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:03",
+    "source": "test/output.sh",
+    "line": 14,
+    "title": "DEPENDS",
+    "command": "./bin/cli.js lib/api.js -d log.js",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:04",
+    "source": "test/output.sh",
+    "line": 17,
+    "title": "CIRCULAR (OK)",
+    "command": "./bin/cli.js test/cjs/a.js -c",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:05",
+    "source": "test/output.sh",
+    "line": 20,
+    "title": "CIRCULAR (FOUND, NO INDEX COUNTING)",
+    "command": "./bin/cli.js test/cjs/circular/a.js -c --no-count",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:06",
+    "source": "test/output.sh",
+    "line": 23,
+    "title": "CIRCULAR (FOUND, WITH INDEX COUNT)",
+    "command": "./bin/cli.js test/cjs/circular/a.js -c",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:07",
+    "source": "test/output.sh",
+    "line": 26,
+    "title": "NPM",
+    "command": "./bin/cli.js test/cjs/npm.js --include-npm",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:08",
+    "source": "test/output.sh",
+    "line": 29,
+    "title": "STDIN",
+    "command": "./bin/cli.js --json lib/api.js | tr '[a-z]' '[A-Z]' | ./bin/cli.js --stdin",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:09",
+    "source": "test/output.sh",
+    "line": 32,
+    "title": "IMAGE",
+    "command": "./bin/cli.js lib/api.js --image /tmp/test.svg",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:10",
+    "source": "test/output.sh",
+    "line": 35,
+    "title": "DOT",
+    "command": "./bin/cli.js lib/api.js --dot",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:11",
+    "source": "test/output.sh",
+    "line": 38,
+    "title": "JSON",
+    "command": "./bin/cli.js lib/api.js --json",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:12",
+    "source": "test/output.sh",
+    "line": 41,
+    "title": "NO COLOR",
+    "command": "./bin/cli.js lib/api.js --no-color",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:13",
+    "source": "test/output.sh",
+    "line": 44,
+    "title": "SHOW EXTENSION",
+    "command": "./bin/cli.js lib/api.js --show-extension",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:14",
+    "source": "test/output.sh",
+    "line": 47,
+    "title": "WARNINGS (NOTE)",
+    "command": "./bin/cli.js test/cjs/missing.js -c",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:15",
+    "source": "test/output.sh",
+    "line": 50,
+    "title": "WARNINGS (LIST)",
+    "command": "./bin/cli.js test/cjs/missing.js -c --warning",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:16",
+    "source": "test/output.sh",
+    "line": 53,
+    "title": "ERROR",
+    "command": "./bin/cli.js file/not/found.js",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  },
+  {
+    "id": "output:17",
+    "source": "test/output.sh",
+    "line": 56,
+    "title": "DEBUG",
+    "command": "./bin/cli.js lib/log.js --debug",
+    "disposition": "unsupported",
+    "reason": "Manual upstream demonstration without assertions or expected output; Madge CLI flags, formatting and exit behavior are not oxdg CLI contracts."
+  }
+]

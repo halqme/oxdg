@@ -6,6 +6,11 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Maintenance
+
+- Added a pinned, MIT-attributed Madge 8.0.0 compatibility corpus with runnable comparisons and reporting of differences and unsupported cases.
+- Keep vendored Madge sources unchanged by excluding only upstream corpus paths from staged checks.
+
 ### Changed
 
 - Reduce installation size by bundling JavaScript dependencies and omitting debug source maps from the published package.
