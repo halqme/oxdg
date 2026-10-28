@@ -4,6 +4,12 @@ All notable user-facing and maintenance changes to oxdg are documented here.
 
 The project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Preserve Vue script imports when script or style blocks contain less-than comparisons.
+
 ## [0.5.2] - 2026-10-25
 
 ### Maintenance

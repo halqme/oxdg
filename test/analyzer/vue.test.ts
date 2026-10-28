@@ -158,6 +158,42 @@ describe("Vue project fixture", () => {
 });
 
 describe("Vue script extraction boundaries", () => {
+  test("extracts imports around less-than comparisons and style content", async () => {
+    const root = await createFixture({
+      "src/Component.vue": `<style>/* a < b */</style>
+<script lang="ts">
+import { value } from "./first.ts";
+const first = value < other;
+</script>
+<script setup lang="ts">
+import { second } from "./second.ts";
+const comparison = second <other;
+</SCRIPT>
+`,
+      "src/first.ts": "export const value = 1;\n",
+      "src/second.ts": "export const second = 2;\n",
+    });
+
+    try {
+      const result = await analyze("src/Component.vue", { cwd: root });
+      expectEdge(result, {
+        from: "src/Component.vue",
+        specifier: "./first.ts",
+        to: "src/first.ts",
+        status: "internal",
+      });
+      expectEdge(result, {
+        from: "src/Component.vue",
+        specifier: "./second.ts",
+        to: "src/second.ts",
+        status: "internal",
+      });
+      expect(result.warnings).toEqual([]);
+    } finally {
+      await removeFixture(root);
+    }
+  });
+
   test("ignores tag-like markup inside templates and script strings", async () => {
     const root = await createFixture({
       "src/main.ts": 'import "./Component.vue";\n',
