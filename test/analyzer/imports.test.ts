@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { describe, expect, test } from "bun:test";
 import { extractImports } from "../../src/analyzer/imports.ts";
 
@@ -51,6 +52,58 @@ describe("dependency extraction", () => {
     expect(result.imports).toEqual([
       { specifier: "./dynamic.js", kind: "dynamic-import", typeOnly: false },
     ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("extracts TypeScript import-equals require dependencies", () => {
+    const result = extractImports('import value = require("./value");', "sample.ts");
+
+    expect(result.imports).toEqual([{ specifier: "./value", kind: "require", typeOnly: false }]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  test.each(["Bun", "Node"])("preserves import-equals metadata and order under %s", (runtime) => {
+    const source = [
+      'import "./first";',
+      'import type Value = require("./types");',
+      'export import value = require("./value");',
+      "import alias = Namespace.value;",
+      'require("./last");',
+    ].join("\n");
+    let result;
+    if (runtime === "Node") {
+      const child = spawnSync(
+        "node",
+        [
+          "--experimental-strip-types",
+          "--input-type=module",
+          "-e",
+          `import { extractImports } from ${JSON.stringify(import.meta.resolve("../../src/analyzer/imports.ts"))};
+console.log(JSON.stringify(extractImports(${JSON.stringify(source)}, "sample.ts", true)));`,
+        ],
+        { encoding: "utf8" },
+      );
+      expect(child.error).toBeUndefined();
+      expect(child.status).toBe(0);
+      result = JSON.parse(child.stdout);
+    } else {
+      result = extractImports(source, "sample.ts", true);
+    }
+    expect(result).toEqual({
+      imports: [
+        { specifier: "./first", kind: "import", typeOnly: false, location: { line: 1 } },
+        { specifier: "./types", kind: "require", typeOnly: true, location: { line: 2 } },
+        { specifier: "./value", kind: "require", typeOnly: false, location: { line: 3 } },
+        { specifier: "./last", kind: "require", typeOnly: false, location: { line: 5 } },
+      ],
+      warnings: [],
+    });
+  });
+
+  test("does not treat qualified import-equals as an external require", () => {
+    const result = extractImports("import value = Namespace.value;", "sample.ts");
+
+    expect(result.imports).toEqual([]);
     expect(result.warnings).toEqual([]);
   });
 

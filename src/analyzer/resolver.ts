@@ -1,7 +1,10 @@
-import { extname, isAbsolute, resolve } from "node:path";
+import { realpathSync, statSync } from "node:fs";
+import { createRequire } from "node:module";
+import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { ResolverFactory } from "oxc-resolver";
 import { DEFAULT_EXTENSIONS } from "./discover.ts";
 import { isNodeModulesPath } from "./npm.ts";
+import { isGitPath } from "./exclude.ts";
 import type { AnalyzeOptions } from "../types/analysis.ts";
 import type { DependencyKind } from "../types/graph.ts";
 
@@ -10,6 +13,7 @@ const JSON_EXTENSION = ".json";
 export type ResolveResult =
   | { status: "internal"; absolutePath: string }
   | { status: "external" }
+  | { status: "excluded" }
   | { status: "unresolved"; reason?: string };
 
 export interface Resolver {
@@ -40,11 +44,59 @@ function isBareSpecifier(specifier: string): boolean {
   );
 }
 
+function isWithinRoot(root: string, filePath: string): boolean {
+  const path = relative(root, filePath);
+  return path !== ".." && !path.startsWith(`..${sep}`) && !isAbsolute(path);
+}
+
+function hasInstalledPackage(specifier: string, importer: string): boolean {
+  const parts = specifier.split("/");
+  const packageName = specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]!;
+  // Package presence does not depend on a working main, index, or exported subpath.
+  const lookupPaths = createRequire(importer).resolve.paths(packageName) ?? [];
+  return lookupPaths.some((lookupPath) => {
+    try {
+      // Follow workspace/package-manager symlinks to their package directories.
+      return statSync(join(lookupPath, packageName)).isDirectory();
+    } catch {
+      return false;
+    }
+  });
+}
+
+function resolveFromRoot(
+  factory: ResolverFactory,
+  root: string,
+  specifier: string,
+  importer: string,
+): string | undefined {
+  if (
+    specifier.length === 0 ||
+    !isBareSpecifier(specifier) ||
+    specifier.startsWith("#") ||
+    /[\\:?#\0]/.test(specifier) ||
+    !isWithinRoot(root, resolve(root, specifier)) ||
+    hasInstalledPackage(specifier, importer)
+  ) {
+    return undefined;
+  }
+  const result = factory.sync(root, `./${specifier}`);
+  if (!result.path || !isWithinRoot(root, resolve(result.path))) {
+    return undefined;
+  }
+  try {
+    // Directory mains and symlinks can escape even when the request stays inside cwd.
+    return isWithinRoot(realpathSync(root), realpathSync(result.path)) ? result.path : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function createResolverOptions(
   options: AnalyzeOptions,
   extensions: readonly string[],
   conditionNames: readonly string[],
-): ConstructorParameters<typeof ResolverFactory>[0] {
+): NonNullable<ConstructorParameters<typeof ResolverFactory>[0]> {
   const tsconfig = options.tsconfig
     ? {
         configFile: resolve(options.cwd ?? process.cwd(), options.tsconfig),
@@ -80,22 +132,41 @@ export function createResolver(options: AnalyzeOptions): Resolver {
   const esmFactory = new ResolverFactory(
     createResolverOptions(options, [...extensions, JSON_EXTENSION], ["node", "import"]),
   );
-  const cjsFactory = esmFactory.cloneWithOptions({
-    conditionNames: ["node", "require"],
-  });
+  const cjsFactory = esmFactory.cloneWithOptions(
+    createResolverOptions(options, [...extensions, JSON_EXTENSION], ["node", "require"]),
+  );
   const includeNpm = options.includeNpm ?? false;
+  const root = resolve(options.cwd ?? process.cwd());
 
   return {
     resolve(specifier, importer, kind) {
-      const factory = kind === "require" || kind === "require-resolve" ? cjsFactory : esmFactory;
+      const isRequire = kind === "require" || kind === "require-resolve";
+      const factory = isRequire ? cjsFactory : esmFactory;
       const result = factory.resolveFileSync(importer, specifier);
 
       if (result.builtin) {
         return { status: "external" };
       }
 
-      if (result.path) {
-        const absolutePath = resolve(result.path);
+      const resolvedPath =
+        result.path ??
+        (result.error === `Cannot find module '${specifier}'`
+          ? resolveFromRoot(factory, root, specifier, importer)
+          : undefined);
+      if (resolvedPath) {
+        const absolutePath = resolve(resolvedPath);
+        let canonicalPath: string;
+        try {
+          canonicalPath = realpathSync(absolutePath);
+        } catch {
+          return {
+            status: "unresolved",
+            reason: `resolved file no longer exists: ${absolutePath}`,
+          };
+        }
+        if (isGitPath(absolutePath) || isGitPath(canonicalPath)) {
+          return { status: "excluded" };
+        }
         if (isNodeModulesPath(absolutePath)) {
           return includeNpm ? { status: "internal", absolutePath } : { status: "external" };
         }

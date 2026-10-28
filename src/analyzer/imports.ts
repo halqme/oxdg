@@ -134,6 +134,31 @@ function scanDependencyNode(
     return;
   }
 
+  if (type === "TSImportEqualsDeclaration") {
+    const moduleReference = propertyValue(node, "moduleReference");
+    if (nodeType(moduleReference) !== "TSExternalModuleReference") {
+      return;
+    }
+    const expression = propertyValue(moduleReference, "expression");
+    const specifier = stringLiteralValue(expression);
+    const start = propertyValue(node, "start");
+    if (typeof start !== "number") {
+      return;
+    }
+    if (specifier !== undefined) {
+      addReference(
+        references,
+        start,
+        specifier,
+        "require",
+        propertyValue(node, "importKind") === "type",
+      );
+    } else {
+      addDynamicWarning(warnings, filePath, "import-equals require");
+    }
+    return;
+  }
+
   if (type !== "CallExpression") {
     return;
   }
@@ -209,6 +234,9 @@ function scanLazyAst(
         scanDependencyNode(node, references, warnings, filePath);
       },
       CallExpression(node) {
+        scanDependencyNode(node, references, warnings, filePath);
+      },
+      TSImportEqualsDeclaration(node) {
         scanDependencyNode(node, references, warnings, filePath);
       },
     }),

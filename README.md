@@ -71,7 +71,7 @@ The table below focuses on documented capabilities rather than overall ratings. 
 
 `module-graph` refers to `@thepassle/module-graph`; its documented analyzer is ESM-oriented and does not analyze `require()`.
 
-The [Madge v8.0.0 compatibility corpus](test/madge-compat/README.md) preserves the complete upstream test and fixture inventory, with runnable comparisons against upstream expectations. `bun run test:madge-compat` reports matches, differences, unsupported contracts, and execution errors separately; it currently fails on known differences. This is not a claim of drop-in compatibility.
+The [Madge v8.0.0 compatibility corpus](test/madge-compat/README.md) compares oxdg against upstream test expectations. The latest run recorded 28 scoped matches, 6 differences, 24 unsupported test cases, 17 untested manual CLI commands, and 0 execution errors. Differences include npm graph representation and warnings; AMD and Flow are not supported. These results do not establish drop-in compatibility or a compatibility percentage. Run `bun run test:madge-compat --report-only` for details.
 
 ## One-shot CLI
 
@@ -136,6 +136,10 @@ npx oxdg ./src/index.ts --image graph.svg
 Without an output option, oxdg prints a plain-text dependency graph.
 
 Additional analysis options include `--cwd`, `--tsconfig` (or `--ts-config`), `--include-npm`, `--no-type-imports`, `--extensions ts,tsx`, and repeated `--exclude` patterns. With `--include-npm`, resolved npm dependencies appear as package-level nodes (`npm:<package>`); their source files are not analyzed. Mermaid, D2, and SVG distinguish npm nodes by color.
+
+Module resolution first uses the importer's normal TypeScript aliases, package imports/exports, npm packages, and Node.js builtins. If a bare import is not found, oxdg also tries it relative to `cwd`, not the importer's directory or ancestor directories. This fallback supports the configured extensions and directory entrypoints, but cannot escape `cwd` through traversal, symlinks, or package entrypoints. Package export restrictions are not bypassed; `#` imports, URL schemes, absolute paths, and relative imports do not use this fallback. Explicit relative imports and configured aliases can still resolve outside `cwd`.
+
+Paths with an exact `.git` component are always excluded from discovery, explicit inputs, and resolved imports, including symlink targets and paths outside `cwd`. Exclude negations cannot re-include them. No files are changed or deleted; similarly named directories such as `.github` and `.git_tmp` are unaffected. Inputs containing only excluded files produce the usual no-supported-files error.
 
 Exclude strings use gitignore semantics via the `ignore` package, relative to `cwd` (the current directory by default), for discovered project source files and resolved imports. With `--include-npm`, patterns match each resolved package file before its import edge is grouped into the package-level `npm:<package>` node; excluding one subpath does not exclude other imports from that package. For example, `*.test.ts` matches at any depth, `/generated.ts` matches only at the root, `src/generated.ts` matches that path from the root, and `generated/` excludes directories of that name and their contents. Patterns are evaluated in order; `!` re-includes matching paths, but a file cannot be re-included while its parent directory is excluded. Comments (`#`) and backslash escapes follow gitignore syntax. `.gitignore` files are not loaded automatically, and gitignore patterns do not apply to modules outside `cwd`.
 

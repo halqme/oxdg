@@ -269,8 +269,7 @@
     "cwd": "git",
     "input": "a.js",
     "setup": "git-directory",
-    "baseline": "difference",
-    "difference": "Explicit imports into .git are followed by oxdg."
+    "baseline": "match"
   },
   {
     "id": "api:11",
@@ -572,8 +571,7 @@
     "cwd": "es6",
     "input": "absolute.js",
     "disposition": "compare",
-    "baseline": "difference",
-    "difference": "Madge base-directory bare import resolution is not reproduced."
+    "baseline": "match"
   },
   {
     "id": "es6:02",
@@ -731,8 +729,7 @@
     "cwd": "typescript",
     "input": "import.ts",
     "disposition": "compare",
-    "baseline": "difference",
-    "difference": "TypeScript import-equals dependency is not extracted."
+    "baseline": "match"
   },
   {
     "id": "typescript:02",
@@ -776,8 +773,7 @@
     "input": "mixed.ts",
     "disposition": "compare",
     "scope": "Dependency graph only: oxdg has mixed import extraction by default, not the Madge detectiveOptions API.",
-    "baseline": "difference",
-    "difference": "CommonJS extensionless TypeScript require is unresolved."
+    "baseline": "match"
   },
   {
     "id": "vue:01",

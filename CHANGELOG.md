@@ -17,6 +17,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Keep installed legacy packages with missing entry points or subpaths from resolving to unrelated files in the analysis base directory, including symlinked packages.
+- Resolve otherwise missing bare imports from the analysis base directory without overriding aliases, npm packages, builtins, or package export restrictions. Keep fallback targets inside that directory.
+- Exclude `.git` paths from explicit inputs and imported dependencies as well as directory scans, including symlink targets, without modifying files.
+- Extract TypeScript import-equals dependencies, including type-only imports, on Bun and Node.js. Preserve TypeScript resolution options and require package conditions for CommonJS dependencies.
 - Preserve Vue script imports when script, style, or custom blocks contain less-than characters.
 - Return exit code 1 when source parsing fails, so incomplete graphs are detectable in scripts.
 

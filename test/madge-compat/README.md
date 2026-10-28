@@ -25,10 +25,11 @@ bun run check
 bun run format:check
 ```
 
-The strict command currently exits **1**: 24 scoped matches, 10 differences, 24
-unsupported Mocha cases, and 17 unsupported manual commands; zero execution
-errors on the initial macOS/Bun 1.4.4 verification. These are observations of this
-checkout, not compatibility percentages or a claim that all upstream tests pass.
+The report-only command was run on macOS with Bun 1.4.4: **28 matches, 6
+differences, 41 unsupported entries, and 0 execution errors**. The strict command
+therefore exits 1 because differences remain. These are results of the adapted
+comparisons in this checkout, not compatibility percentages or a claim that all
+upstream tests pass.
 
 The Bun suite registers matching comparisons as strict tests, known differences
 as explicitly named `DIFFERENCE` todos, and unsupported contracts as explicitly
@@ -103,7 +104,12 @@ vendored, so `upstream/test/*.js` and `output.sh` are not standalone commands he
 Adaptations are deliberately narrow:
 
 - Explicit `cwd` roots correspond to upstream's common input directory. Returned
-  IDs are never rewritten to conceal differences, including `../d.js`.
+  IDs are never rewritten to conceal differences, including `../d.js`. For
+  `es6:01`, `cwd` is `test/es6`: `absolute/a` resolves from that root, while
+  the transitive `test/es6/absolute/b` is not resolved by searching ancestors.
+  This exercises oxdg's bounded cwd fallback, not Madge's `baseDir` option API
+  or all of its resolution rules. Normal aliases, packages and builtins retain
+  priority; fallback cannot escape cwd through symlinks or directory entrypoints.
 - Graph comparisons project only internal adjacency, sorted by module/dependency
   ID and deduplicated across multiple import kinds. This matches the set-like
   Madge dependency object; npm nodes are **not** renamed or dropped. External and
@@ -132,18 +138,20 @@ in JSON; absolute file paths and temporary paths make reports machine-dependent.
 
 ## Differences and unsupported boundaries
 
-The ten known differences are listed with reasons in `cases.json` and printed with
-both upstream expected and oxdg actual values by the strict runner:
+The six remaining known differences are listed with reasons in `cases.json` and
+printed with both upstream expected and oxdg actual values by the strict runner:
 
 - `api:03`: missing-path error wording.
-- `api:10`: traversal of explicit imports into `.git`.
 - `api:17`: skipped-file warning object versus native diagnostic array.
 - `cjs:07`: shallow npm file references versus package-level nodes.
-- `es6:01`: base-directory bare import resolution.
 - `es6:04`: unsupported export-default-from proposal syntax.
 - `flow:02`, `flow:03`: unsupported Flow import-type syntax.
-- `typescript:01`: missing import-equals dependency.
-- `typescript:04`: unresolved extensionless TypeScript CommonJS require.
+
+Matching scoped comparisons include `api:10` (`.git` import exclusion),
+`es6:01` (base-directory bare imports), `typescript:01` (import-equals require),
+and `typescript:04` (extensionless CommonJS TypeScript requires). This does not
+establish full TypeScript or Madge API compatibility; in particular, the two
+custom `tsConfig` API cases remain unsupported as listed above.
 
 Unsupported contracts include AMD/RequireJS (all nine cases), predefined-tree
 input, synchronous missing-argument validation, regex exclusion, traversal-filter
@@ -177,4 +185,6 @@ stdin, option spelling, styling, or exit-code compatibility is claimed.
    difference), exercise execution errors and unsupported isolation, and reorder
    equivalent graphs (must preserve adjacency).
 
-There are no production behavior changes in this port and no new dependencies.
+The corpus adds no dependencies. Production resolution and exclusion behavior is
+documented in the repository README; these comparisons cover only the scoped
+upstream expectations above.

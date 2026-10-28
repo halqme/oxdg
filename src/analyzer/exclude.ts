@@ -4,6 +4,10 @@ import type { ExcludePattern } from "../types/analysis.ts";
 
 export type ExcludeMatcher = (filePath: string) => boolean;
 
+export function isGitPath(filePath: string): boolean {
+  return filePath.split(sep).includes(".git");
+}
+
 export function createExcludeMatcher(
   patterns: ExcludePattern | readonly ExcludePattern[] | undefined,
   rootDir: string,
@@ -12,6 +16,8 @@ export function createExcludeMatcher(
 
   return (filePath: string): boolean => {
     const relativePath = relative(rootDir, filePath).split(sep).join("/");
-    return ignore.isPathValid(relativePath) && gitignore.ignores(relativePath);
+    return (
+      isGitPath(filePath) || (ignore.isPathValid(relativePath) && gitignore.ignores(relativePath))
+    );
   };
 }

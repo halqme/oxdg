@@ -2,6 +2,7 @@ import { lstat, readdir, realpath, stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { SOURCE_EXTRACTOR_PLUGINS } from "../plugin/registry.ts";
 import { isNodeModulesPath } from "./npm.ts";
+import { isGitPath } from "./exclude.ts";
 import type { AnalyzeInput } from "../types/analysis.ts";
 
 const CORE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts"] as const;
@@ -84,7 +85,7 @@ async function inspectInput(
   files: Set<string>,
 ): Promise<void> {
   const absolutePath = resolve(inputPath);
-  if (isNodeModulesPath(absolutePath)) {
+  if (isNodeModulesPath(absolutePath) || isGitPath(absolutePath)) {
     return;
   }
   const link = await lstat(absolutePath);
