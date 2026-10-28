@@ -24,8 +24,15 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function setExitCode(failOnCircular: boolean, cycleCount: number): void {
-  process.exitCode = failOnCircular && cycleCount > 0 ? 1 : 0;
+function setExitCode(
+  failOnCircular: boolean,
+  cycleCount: number,
+  warnings: readonly { code: string }[],
+): void {
+  process.exitCode =
+    warnings.some((warning) => warning.code === "parse-error") || (failOnCircular && cycleCount > 0)
+      ? 1
+      : 0;
 }
 
 function renderModuleList(modules: readonly string[], json: boolean): string {
@@ -116,7 +123,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
         );
       }
       process.stdout.write(renderExplanations(selected, cliOptions.format === "json"));
-      setExitCode(cliOptions.failOnCircular, cycles.length);
+      setExitCode(cliOptions.failOnCircular, cycles.length, result.warnings);
       return;
     }
 
@@ -131,13 +138,13 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
           ? findLeaves(result.graph)
           : findDirectDependents(result.graph, dependsModule ?? "");
       process.stdout.write(renderModuleList(modules, cliOptions.format === "json"));
-      setExitCode(cliOptions.failOnCircular, cycles.length);
+      setExitCode(cliOptions.failOnCircular, cycles.length, result.warnings);
       return;
     }
 
     if (cliOptions.circular && cliOptions.format === "text") {
       process.stdout.write(`${renderCycles(cycles)}\n`);
-      setExitCode(cliOptions.failOnCircular, cycles.length);
+      setExitCode(cliOptions.failOnCircular, cycles.length, result.warnings);
       return;
     }
 
@@ -169,7 +176,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
           ),
           "utf8",
         );
-        setExitCode(cliOptions.failOnCircular, cycles.length);
+        setExitCode(cliOptions.failOnCircular, cycles.length, result.warnings);
         return;
       }
       case "text":
@@ -178,7 +185,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
     }
 
     process.stdout.write(`${output}\n`);
-    setExitCode(cliOptions.failOnCircular, cycles.length);
+    setExitCode(cliOptions.failOnCircular, cycles.length, result.warnings);
   } catch (error) {
     if (error instanceof CliUsageError) {
       if (!error.reported) {

@@ -84,6 +84,36 @@ test("uses exit code 2 for usage errors and 1 for analysis failures", () => {
   expect(runCli("missing-input.ts").status).toBe(1);
 });
 
+test("returns a failure for parse errors while preserving output and other warnings", async () => {
+  const root = await createFixture({
+    "src/broken.js": "const value = ;\n",
+    "src/warning.js": 'import "./missing.js";\n',
+  });
+  try {
+    for (const mode of [
+      [],
+      ["--json"],
+      ["--orphans"],
+      ["--circular"],
+      ["--circular", "--explain"],
+      ["--image", join(root, "graph.svg")],
+    ]) {
+      const result = runCliIn(root, "src/broken.js", ...mode);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("oxdg: parse-error:");
+    }
+    const json = runCliIn(root, "src/broken.js", "--json");
+    expect(JSON.parse(json.stdout).modules).toEqual([
+      expect.objectContaining({ id: "src/broken.js" }),
+    ]);
+    const warning = runCliIn(root, "src/warning.js");
+    expect(warning.status).toBe(0);
+    expect(warning.stderr).toContain("oxdg: unresolved-import:");
+  } finally {
+    await removeFixture(root);
+  }
+});
+
 test("runs graph queries and fail-on-circular through the CLI", async () => {
   const root = await createFixture({
     "src/a.ts": 'import "./b.js";\n',

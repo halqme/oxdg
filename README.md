@@ -94,7 +94,7 @@ bunx oxdg ./src --circular
 bunx oxdg ./src --fail-on-circular
 ```
 
-`--fail-on-circular` exits with code 1 when a cycle exists. Successful analysis exits with 0; invalid command usage exits with 2.
+The CLI exits with code 1 when parsing fails, or when a cycle exists and `--fail-on-circular` is set. It still emits the available output on parse errors, but the graph may be incomplete. Other warnings do not change the exit code. Successful analysis exits with 0; invalid command usage exits with 2.
 
 Example:
 
