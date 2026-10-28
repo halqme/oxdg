@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Reduce installation size by bundling JavaScript dependencies and omitting debug source maps from the published package.
+
 ### Fixed
 
 - Preserve Vue script imports when script, style, or custom blocks contain less-than characters.
