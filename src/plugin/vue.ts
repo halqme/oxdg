@@ -74,6 +74,13 @@ function findNextVueTag(source: string, start: number): VueTag | undefined {
 }
 
 function findVueBlockClose(source: string, name: string, start: number): VueTag | undefined {
+  if (name === "script" || name === "style") {
+    const closingTag = new RegExp(`</${name}(?=[\\s/>])`, "gi");
+    closingTag.lastIndex = start;
+    const match = closingTag.exec(source);
+    return match ? findNextVueTag(source, match.index) : undefined;
+  }
+
   const nestedTemplates = name === "template";
   let depth = 1;
   let position = start;
