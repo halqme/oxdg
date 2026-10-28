@@ -8,7 +8,8 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- Preserve Vue script imports when script or style blocks contain less-than comparisons.
+- Preserve Vue script imports when script, style, or custom blocks contain less-than characters.
+- Return exit code 1 when source parsing fails, so incomplete graphs are detectable in scripts.
 
 ## [0.5.2] - 2026-10-25
 

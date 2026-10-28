@@ -158,6 +158,27 @@ describe("Vue project fixture", () => {
 });
 
 describe("Vue script extraction boundaries", () => {
+  test("extracts imports after custom blocks containing less-than characters", async () => {
+    const root = await createFixture({
+      "src/Component.vue": `<i18n>{"message": "a < b"}</i18n>
+<custom-block>{"message": "a <b"}</custom-block>
+<script>import "./dependency.js";</script>`,
+      "src/dependency.js": "export {};\n",
+    });
+    try {
+      const result = await analyze("src/Component.vue", { cwd: root });
+      expectEdge(result, {
+        from: "src/Component.vue",
+        specifier: "./dependency.js",
+        to: "src/dependency.js",
+        status: "internal",
+      });
+      expect(result.warnings).toEqual([]);
+    } finally {
+      await removeFixture(root);
+    }
+  });
+
   test("extracts imports around less-than comparisons and style content", async () => {
     const root = await createFixture({
       "src/Component.vue": `<style>/* a < b */</style>

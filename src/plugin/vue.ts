@@ -74,7 +74,7 @@ function findNextVueTag(source: string, start: number): VueTag | undefined {
 }
 
 function findVueBlockClose(source: string, name: string, start: number): VueTag | undefined {
-  if (name === "script" || name === "style") {
+  if (name !== "template") {
     const closingTag = new RegExp(`</${name}(?=[\\s/>])`, "gi");
     closingTag.lastIndex = start;
     const match = closingTag.exec(source);
