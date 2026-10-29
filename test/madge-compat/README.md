@@ -54,12 +54,11 @@ The source was obtained using GitHub's repository tarball API, and the tag targe
 was checked through its Git API. The tag is unsigned; this is source pinning,
 not signature verification.
 
-`upstream/` contains 127 byte-for-byte copies: the entire 124-file `test/` tree,
-plus `LICENSE`, `package.json`, and `package-lock.json`. SHA-256 digests and the
-pin live in `provenance.json`. The original MIT copyright and permission notice
-are preserved in [`upstream/LICENSE`](upstream/LICENSE). The lockfile preserves
-upstream dependency context; it does not control this project's resolver versions.
-No upstream runtime dependency or Graphviz installation is required to run the
+`upstream/` contains 125 byte-for-byte copies: the entire 124-file `test/` tree
+and `LICENSE`. SHA-256 digests and the pin live in `provenance.json`. The original
+MIT copyright and permission notice are preserved in [`upstream/LICENSE`](upstream/LICENSE).
+Upstream dependency manifests are omitted because the port does not install or use
+them. No upstream runtime dependency or Graphviz installation is required to run the
 ported comparisons.
 
 Files under `upstream/` are inert test data, not project source or installed
