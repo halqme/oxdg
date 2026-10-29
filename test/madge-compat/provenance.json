@@ -5,8 +5,6 @@
   "commit": "456057b85c2d063dad9c10147d7686ded4fc5ce5",
   "files": {
     "LICENSE": "c522c4f66bf892c20ac5d5b9fd3a6e10c3ab384bbeb2efb3cc09cffb69fa56c0",
-    "package-lock.json": "a734c9e48a6927156293decb4a649f0bd7a9734741f1636f4884bbe81407b413",
-    "package.json": "2f02f53c51d045e4049d15a7a09cb091c697d6d0c98002dac443f9718c4e5029",
     "test/amd/amdes6.js": "e3c78b1d5aa0fc631566c7a08456fc28ffc72d2e1f8a4a3e11b280bbb15f1acd",
     "test/amd/circular/a.js": "c24c7e48aa76ff8680e5dfd64a06192e556136682f90b1ee7e746ffa9e54a4d1",
     "test/amd/circular/b.js": "e1c8d08a6bdb70f859a11f8db8431faa3293ae1a25d6463bd46a0ce81b4d07b5",
