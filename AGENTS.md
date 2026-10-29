@@ -34,5 +34,5 @@ bun test
 ## Changelog
 
 - Every branch with project changes must update `CHANGELOG.md` before the work is complete, including documentation, tests, CI, and maintenance changes.
-- Add entries under `## [Unreleased]`; do not add a version heading for unreleased work.
+- Add entries under `## [Unreleased]` during regular development. When preparing a release, move its entries under a dated version heading before publishing and keep an empty `## [Unreleased]` section for future changes.
 - Write concise, plain-language entries that explain the change and its impact. Avoid implementation details and commit-message-style summaries. Use `### Maintenance` for changes without a direct user-facing impact.
