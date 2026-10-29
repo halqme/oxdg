@@ -8,6 +8,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ### Maintenance
 
+- Omit unused upstream dependency manifests from the Madge compatibility corpus to avoid misleading dependency alerts.
 - Added a pinned, MIT-attributed Madge 8.0.0 compatibility corpus with runnable comparisons and reporting of differences and unsupported cases.
 - Keep vendored Madge sources unchanged by excluding only upstream corpus paths from staged checks.
 
