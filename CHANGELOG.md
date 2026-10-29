@@ -6,8 +6,11 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-29
+
 ### Maintenance
 
+- Clarify that release notes are finalized during release preparation, before publishing.
 - Omit unused upstream dependency manifests from the Madge compatibility corpus to avoid misleading dependency alerts.
 - Added a pinned, MIT-attributed Madge 8.0.0 compatibility corpus with runnable comparisons and reporting of differences and unsupported cases.
 - Keep vendored Madge sources unchanged by excluding only upstream corpus paths from staged checks.
@@ -150,7 +153,9 @@ The project follows [Semantic Versioning](https://semver.org/).
 - Text, JSON, Mermaid, D2, and standalone SVG output.
 - Public analysis and rendering API.
 
-[Unreleased]: https://github.com/halqme/oxdg/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/halqme/oxdg/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/halqme/oxdg/releases/tag/v0.6.0
+[0.5.2]: https://github.com/halqme/oxdg/releases/tag/v0.5.2
 [0.5.1]: https://github.com/halqme/oxdg/releases/tag/v0.5.1
 [0.5.0]: https://github.com/halqme/oxdg/releases/tag/v0.5.0
 [0.4.2]: https://github.com/halqme/oxdg/releases/tag/v0.4.2
