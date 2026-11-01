@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Record dependencies from the export-default-from proposal (`export v from "mod"` and `export default from "mod"`) without parse errors, including sibling imports in the same file.
+
 ### Added
 
 - Add `--from <module>` to render or query the subgraph reachable from a file or workspace package, including cycles and npm edges that start inside that set.

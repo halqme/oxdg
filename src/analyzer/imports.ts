@@ -195,6 +195,23 @@ function canUseLazyParser(): boolean {
   );
 }
 
+/**
+ * Oxc rejects the export-default-from proposal (`export v from "mod"` /
+ * `export default from "mod"`). Rewrite those forms to standard re-exports so
+ * the module specifier and sibling imports are still extracted.
+ */
+function recoverExportDefaultFrom(source: string): string {
+  if (!/\bexport\s+(?:default|[A-Za-z_$][\w$]*)\s+from\s*['"]/.test(source)) {
+    return source;
+  }
+
+  return source.replace(
+    /\bexport\s+([A-Za-z_$][\w$]*)\s+from\s*(['"])([^'"]*)\2/g,
+    (_match, name: string, quote: string, specifier: string) =>
+      `export { default as ${name} } from ${quote}${specifier}${quote}`,
+  );
+}
+
 function parseSource(
   source: string,
   filePath: string,
@@ -249,7 +266,8 @@ function extractSourceImports(
   language?: ScriptLanguage,
   includeLocations = false,
 ): ImportExtractionResult {
-  const { result, lazy } = parseSource(source, filePath, language);
+  const parseableSource = recoverExportDefaultFrom(source);
+  const { result, lazy } = parseSource(parseableSource, filePath, language);
 
   try {
     const module = result.module;
@@ -293,8 +311,8 @@ function extractSourceImports(
     const needsAstScan =
       errors.length > 0 ||
       module.dynamicImports.length > 0 ||
-      source.includes("require") ||
-      source.includes("\\u");
+      parseableSource.includes("require") ||
+      parseableSource.includes("\\u");
 
     if (needsAstScan) {
       if (lazy) {
@@ -330,9 +348,10 @@ function extractSourceImports(
 
     // Oxc's JavaScript API provides offsets in UTF-16 code units.
     // Build line starts only for explain requests, keeping the normal path unchanged.
+    // Use the parseable source so offsets align when export-default-from was rewritten.
     const starts = [0];
-    for (let offset = 0; offset < source.length; offset += 1) {
-      if (source.charCodeAt(offset) === 10) starts.push(offset + 1);
+    for (let offset = 0; offset < parseableSource.length; offset += 1) {
+      if (parseableSource.charCodeAt(offset) === 10) starts.push(offset + 1);
     }
     const imports = references.map(({ reference, start }) => {
       let low = 0;

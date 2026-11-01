@@ -25,7 +25,7 @@ bun run check
 bun run format:check
 ```
 
-The report-only command was run on macOS with Bun 1.4.4: **28 matches, 6
+The report-only command was run on macOS with Bun 1.4.4: **29 matches, 5
 differences, 41 unsupported entries, and 0 execution errors**. The strict command
 therefore exits 1 because differences remain. These are results of the adapted
 comparisons in this checkout, not compatibility percentages or a claim that all
@@ -137,20 +137,20 @@ in JSON; absolute file paths and temporary paths make reports machine-dependent.
 
 ## Differences and unsupported boundaries
 
-The six remaining known differences are listed with reasons in `cases.json` and
+The five remaining known differences are listed with reasons in `cases.json` and
 printed with both upstream expected and oxdg actual values by the strict runner:
 
 - `api:03`: missing-path error wording.
 - `api:17`: skipped-file warning object versus native diagnostic array.
 - `cjs:07`: shallow npm file references versus package-level nodes.
-- `es6:04`: unsupported export-default-from proposal syntax.
 - `flow:02`, `flow:03`: unsupported Flow import-type syntax.
 
 Matching scoped comparisons include `api:10` (`.git` import exclusion),
-`es6:01` (base-directory bare imports), `typescript:01` (import-equals require),
-and `typescript:04` (extensionless CommonJS TypeScript requires). This does not
-establish full TypeScript or Madge API compatibility; in particular, the two
-custom `tsConfig` API cases remain unsupported as listed above.
+`es6:01` (base-directory bare imports), `es6:04` (export-default-from re-exports),
+`typescript:01` (import-equals require), and `typescript:04` (extensionless
+CommonJS TypeScript requires). This does not establish full TypeScript or Madge
+API compatibility; in particular, the two custom `tsConfig` API cases remain
+unsupported as listed above.
 
 Unsupported contracts include AMD/RequireJS (all nine cases), predefined-tree
 input, synchronous missing-argument validation, regex exclusion, traversal-filter
