@@ -3,7 +3,7 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { findCycles } from "../graph/cycles.ts";
-import { cyclicSubgraph } from "../graph/filter.ts";
+import { cyclicSubgraph, reachableSubgraph } from "../graph/filter.ts";
 import { findDirectDependents, findLeaves, findOrphans } from "../graph/queries.ts";
 import { renderD2 } from "../render/d2.ts";
 import { renderExplanations } from "../render/explain.ts";
@@ -42,7 +42,11 @@ function renderModuleList(modules: readonly string[], json: boolean): string {
   return modules.length === 0 ? "" : `${modules.join("\n")}\n`;
 }
 
-function resolveDependsModule(graph: ModuleGraph, requested: string): ModuleId {
+function resolveModule(
+  graph: ModuleGraph,
+  requested: string,
+  flag: "--depends" | "--from",
+): ModuleId {
   const normalized = requested.replaceAll("\\", "/").replace(/^\.\/+/, "");
   if (graph.nodes.has(normalized)) {
     return normalized;
@@ -63,9 +67,9 @@ function resolveDependsModule(graph: ModuleGraph, requested: string): ModuleId {
     return suffixMatches[0] ?? normalized;
   }
   if (suffixMatches.length > 1 || absoluteMatches.length > 1) {
-    throw new CliUsageError(`--depends module is ambiguous: ${requested}`);
+    throw new CliUsageError(`${flag} module is ambiguous: ${requested}`);
   }
-  throw new CliUsageError(`--depends module was not found: ${requested}`);
+  throw new CliUsageError(`${flag} module was not found: ${requested}`);
 }
 
 export async function main(argv: readonly string[] = process.argv.slice(2)): Promise<void> {
@@ -102,14 +106,23 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
         ).analyzePackages(cliOptions.paths, analysisOptions)
       : await analyze(cliOptions.paths, analysisOptions);
     printWarnings(result.warnings);
-    const cycles = cliOptions.circular || cliOptions.failOnCircular ? findCycles(result.graph) : [];
+
+    let graph = result.graph;
+    if (cliOptions.from !== undefined) {
+      const fromModule = resolveModule(graph, cliOptions.from, "--from");
+      graph = reachableSubgraph(graph, fromModule);
+    }
+
+    const cycles = cliOptions.circular || cliOptions.failOnCircular ? findCycles(graph) : [];
 
     if (cliOptions.explain) {
       const explanations = result.explanations ?? [];
       let selected;
       if (cliOptions.depends !== undefined) {
-        const target = resolveDependsModule(result.graph, cliOptions.depends);
-        selected = explanations.filter((item) => item.to === target);
+        const target = resolveModule(graph, cliOptions.depends, "--depends");
+        selected = explanations.filter(
+          (item) => item.to === target && graph.nodes.has(item.from) && graph.nodes.has(item.to),
+        );
       } else {
         const cycleEdges = new Set<string>();
         for (const cycle of cycles) {
@@ -132,12 +145,12 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
       const dependsModule =
         cliOptions.depends === undefined
           ? undefined
-          : resolveDependsModule(result.graph, cliOptions.depends);
+          : resolveModule(graph, cliOptions.depends, "--depends");
       const modules = cliOptions.orphans
-        ? findOrphans(result.graph)
+        ? findOrphans(graph)
         : cliOptions.leaves
-          ? findLeaves(result.graph)
-          : findDirectDependents(result.graph, dependsModule ?? "");
+          ? findLeaves(graph)
+          : findDirectDependents(graph, dependsModule ?? "");
       process.stdout.write(renderModuleList(modules, cliOptions.format === "json"));
       setExitCode(cliOptions.failOnCircular, cycles.length, result.warnings);
       return;
@@ -149,20 +162,20 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
       return;
     }
 
-    const graph = cliOptions.circular ? cyclicSubgraph(result.graph) : result.graph;
+    const outputGraph = cliOptions.circular ? cyclicSubgraph(graph) : graph;
     let output: string;
     switch (cliOptions.format) {
       case "json":
-        output = renderJson(graph);
+        output = renderJson(outputGraph);
         break;
       case "mermaid":
         output = renderMermaid(
-          graph,
+          outputGraph,
           cliOptions.rankdir === undefined ? {} : { direction: cliOptions.rankdir },
         );
         break;
       case "d2":
-        output = renderD2(graph);
+        output = renderD2(outputGraph);
         break;
       case "svg": {
         if (cliOptions.imagePath === undefined) {
@@ -172,7 +185,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
         await writeFile(
           cliOptions.imagePath,
           renderSvg(
-            graph,
+            outputGraph,
             cliOptions.rankdir === undefined ? {} : { direction: cliOptions.rankdir },
           ),
           "utf8",
@@ -181,7 +194,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
         return;
       }
       case "text":
-        output = renderText(graph);
+        output = renderText(outputGraph);
         break;
     }
 

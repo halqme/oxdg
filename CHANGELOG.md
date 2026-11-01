@@ -10,6 +10,14 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 - Load `.gitignore` files under the analysis root by default for discovery and resolved imports. Nested files apply within their directory. Use `--no-gitignore` or `gitignore: false` to keep previously included ignored paths. Paths passed directly on the command line are still analyzed.
 
+### Fixed
+
+- Record dependencies from the export-default-from proposal (`export v from "mod"` and `export default from "mod"`) without parse errors, including sibling imports in the same file.
+
+### Added
+
+- Add `--from <module>` to render or query the subgraph reachable from a file or workspace package, including cycles and npm edges that start inside that set.
+
 ## [0.6.0] - 2026-10-29
 
 ### Maintenance

@@ -77,6 +77,14 @@ test("parses Commander aliases and analysis options", () => {
   expect(parseCliOptions(["src", "-j"]).format).toBe("json");
   expect(parseCliOptions(["src", "-i", "graph.svg"]).imagePath).toBe("graph.svg");
   expect(parseCliOptions(["src", "-d", "src/entry.ts"]).depends).toBe("src/entry.ts");
+  expect(parseCliOptions(["src", "--from", "src/entry.ts"]).from).toBe("src/entry.ts");
+  expect(parseCliOptions(["src", "--from", "src/entry.ts", "--circular"]).circular).toBe(true);
+  expect(
+    parseCliOptions(["src", "--from", "src/entry.ts", "--depends", "src/leaf.ts"]),
+  ).toMatchObject({
+    from: "src/entry.ts",
+    depends: "src/leaf.ts",
+  });
 
   expect(
     parseCliOptions([

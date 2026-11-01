@@ -71,7 +71,7 @@ The table below focuses on documented capabilities rather than overall ratings. 
 
 `module-graph` refers to `@thepassle/module-graph`; its documented analyzer is ESM-oriented and does not analyze `require()`.
 
-The [Madge v8.0.0 compatibility corpus](test/madge-compat/README.md) compares oxdg against upstream test expectations. The latest run recorded 28 scoped matches, 6 differences, 24 unsupported test cases, 17 untested manual CLI commands, and 0 execution errors. Differences include npm graph representation and warnings; AMD and Flow are not supported. These results do not establish drop-in compatibility or a compatibility percentage. Run `bun run test:madge-compat --report-only` for details.
+The [Madge v8.0.0 compatibility corpus](test/madge-compat/README.md) compares oxdg against upstream test expectations. The latest run recorded 29 scoped matches, 5 differences, 24 unsupported test cases, 17 untested manual CLI commands, and 0 execution errors. Differences include npm graph representation and warnings; AMD and Flow are not supported. These results do not establish drop-in compatibility or a compatibility percentage. Run `bun run test:madge-compat --report-only` for details.
 
 ## One-shot CLI
 
@@ -110,10 +110,14 @@ Query the graph:
 bunx oxdg ./src --orphans
 bunx oxdg ./src --leaves
 bunx oxdg ./src --depends src/core.ts
+bunx oxdg ./src --from src/index.ts
+bunx oxdg ./src --from src/index.ts --image focus.svg
 bunx oxdg ./src --json --orphans
 bunx oxdg ./src --depends src/core.ts --explain
 bunx oxdg ./src --circular --explain --json
 ```
+
+`--from` keeps a module and everything it reaches through internal dependency edges, then applies rendering or queries to that subgraph.
 
 Adding `--json` to a query prints the matching module IDs as a JSON array.
 
@@ -166,6 +170,7 @@ oxdg . --packages --image packages.svg
 oxdg . --packages --json
 oxdg . --packages --circular
 oxdg . --packages --depends @my-org/core
+oxdg . --packages --from @my-org/app --json
 ```
 
 Pass the workspace root, not an individual package directory. npm, Bun, and Yarn `package.json` workspaces (arrays or `{ "packages": [...] }`) and pnpm `pnpm-workspace.yaml` package patterns are supported, including negative patterns. Each workspace package must have a unique name. Yarn Plug'n'Play resolution for external dependencies is not supported.
