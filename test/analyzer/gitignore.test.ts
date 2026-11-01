@@ -120,6 +120,22 @@ test("explicit path roots are analyzed even when gitignored", async () => {
   }
 });
 
+test("loads nested .gitignore inside an explicit ignored root", async () => {
+  const root = await createFixture({
+    ".gitignore": "dist/\n",
+    "dist/.gitignore": "secret.ts\n",
+    "dist/entry.ts": 'import "./secret.ts";\nimport "./keep.ts";\n',
+    "dist/secret.ts": "export {};\n",
+    "dist/keep.ts": "export {};\n",
+  });
+  try {
+    const result = await analyze("dist", { cwd: root });
+    expect([...result.graph.nodes.keys()]).toEqual(["dist/entry.ts", "dist/keep.ts"]);
+  } finally {
+    await removeFixture(root);
+  }
+});
+
 test("gitignore: false and --exclude remain independent filters", async () => {
   const root = await createFixture({
     ".gitignore": "ignored.ts\n",

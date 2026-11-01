@@ -120,8 +120,18 @@ export async function analyzePackages(
     ...(options.exclude === undefined ? {} : { patterns: options.exclude }),
     ...(options.gitignore === undefined ? {} : { gitignore: options.gitignore }),
   });
-  const isExcluded = (path: string) =>
-    matchesExclude(path) || excludedDirectories.some((directory) => contains(directory, path));
+  const isExcluded = Object.assign(
+    (path: string) =>
+      matchesExclude(path) || excludedDirectories.some((directory) => contains(directory, path)),
+    {
+      ...(matchesExclude.registerGitignore
+        ? { registerGitignore: matchesExclude.registerGitignore }
+        : {}),
+      ...(matchesExclude.registerNoGitignore
+        ? { registerNoGitignore: matchesExclude.registerNoGitignore }
+        : {}),
+    },
+  );
   const files = await discoverFiles(
     packages.map((pkg) => pkg.absolutePath),
     {
