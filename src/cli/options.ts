@@ -11,6 +11,7 @@ export interface CliOptions {
   orphans: boolean;
   leaves: boolean;
   depends?: string;
+  from?: string;
   failOnCircular: boolean;
   rankdir?: GraphDirection;
   cwd?: string;
@@ -44,6 +45,7 @@ interface CommanderOptions {
   orphans?: boolean;
   leaves?: boolean;
   depends?: string;
+  from?: string;
   failOnCircular?: boolean;
   rankdir?: GraphDirection;
   cwd?: string;
@@ -99,6 +101,7 @@ function createProgram(): Command {
     .option("--orphans", "list modules without dependents")
     .option("--leaves", "list modules without dependencies")
     .option("-d, --depends <module>", "list modules that directly depend on a module")
+    .option("--from <module>", "render or query the subgraph reachable from a module")
     .option("--fail-on-circular", "exit with code 1 when circular dependencies are found")
     .option(
       "--rankdir <direction>",
@@ -228,6 +231,9 @@ export function parseCliOptions(argv: readonly string[]): CliOptions {
   }
   if (values.depends !== undefined) {
     options.depends = values.depends;
+  }
+  if (values.from !== undefined) {
+    options.from = values.from;
   }
   if (values.rankdir !== undefined) {
     options.rankdir = values.rankdir;

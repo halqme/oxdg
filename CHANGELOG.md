@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Add `--from <module>` to render or query the subgraph reachable from a file or workspace package, including cycles and npm edges that start inside that set.
+
 ## [0.6.0] - 2026-10-29
 
 ### Maintenance

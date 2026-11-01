@@ -213,3 +213,93 @@ test("renders workspace package graphs and queries package names", async () => {
     await removeFixture(root);
   }
 });
+
+test("renders and queries the subgraph reachable from a module", async () => {
+  const root = await createFixture({
+    "src/entry.ts": 'import "./mid.js";\n',
+    "src/mid.ts": 'import "./leaf.js";\nimport "./cycle-a.js";\n',
+    "src/leaf.ts": "export const leaf = true;\n",
+    "src/cycle-a.ts": 'import "./cycle-b.js";\n',
+    "src/cycle-b.ts": 'import "./cycle-a.js";\n',
+    "src/other.ts": 'import "./leaf.js";\n',
+    "src/dup/util.ts": "export const util = 1;\n",
+    "src/alt/util.ts": "export const util = 2;\n",
+  });
+
+  try {
+    const json = runCliIn(root, "src", "--from", "src/mid.ts", "--json");
+    expect(json.status).toBe(0);
+    expect(JSON.parse(json.stdout)).toMatchObject({
+      modules: [
+        { id: "src/cycle-a.ts" },
+        { id: "src/cycle-b.ts" },
+        { id: "src/leaf.ts" },
+        { id: "src/mid.ts" },
+      ],
+    });
+    expect(
+      JSON.parse(json.stdout).modules.map((module: { id: string }) => module.id),
+    ).not.toContain("src/other.ts");
+    expect(
+      JSON.parse(json.stdout).modules.map((module: { id: string }) => module.id),
+    ).not.toContain("src/entry.ts");
+
+    const circular = runCliIn(root, "src", "--from", "mid.ts", "--circular", "--json");
+    expect(circular.status).toBe(0);
+    expect(JSON.parse(circular.stdout).modules.map((module: { id: string }) => module.id)).toEqual([
+      "src/cycle-a.ts",
+      "src/cycle-b.ts",
+    ]);
+
+    expect(runCliIn(root, "src", "--from", "src/mid.ts", "--orphans").stdout).toBe("src/mid.ts\n");
+    expect(runCliIn(root, "src", "--from", "src/mid.ts", "--leaves").stdout).toBe("src/leaf.ts\n");
+    expect(runCliIn(root, "src", "--from", "src/mid.ts", "--depends", "src/leaf.ts").stdout).toBe(
+      "src/mid.ts\n",
+    );
+    expect(
+      runCliIn(root, "src", "--from", "src/mid.ts", "--depends", "src/leaf.ts").stdout,
+    ).not.toContain("src/other.ts");
+
+    const missing = runCliIn(root, "src", "--from", "missing.ts");
+    expect(missing.status).toBe(2);
+    expect(missing.stderr).toContain("--from module was not found: missing.ts");
+
+    const ambiguous = runCliIn(root, "src", "--from", "util.ts");
+    expect(ambiguous.status).toBe(2);
+    expect(ambiguous.stderr).toContain("--from module is ambiguous: util.ts");
+
+    const packagesRoot = await createFixture({
+      "package.json": JSON.stringify({ workspaces: ["packages/*"] }),
+      "packages/app/package.json": JSON.stringify({ name: "@test/app" }),
+      "packages/core/package.json": JSON.stringify({ name: "@test/core" }),
+      "packages/leaf/package.json": JSON.stringify({ name: "@test/leaf" }),
+      "packages/other/package.json": JSON.stringify({ name: "@test/other" }),
+      "packages/app/index.ts": 'import "@test/core";\n',
+      "packages/core/index.ts": 'import "@test/leaf";\n',
+      "packages/leaf/index.ts": "export const leaf = true;\n",
+      "packages/other/index.ts": 'import "@test/leaf";\n',
+    });
+    try {
+      const packages = runCli(
+        ".",
+        "--cwd",
+        packagesRoot,
+        "--packages",
+        "--from",
+        "@test/app",
+        "--json",
+      );
+      expect(packages.status).toBe(0);
+      expect(JSON.parse(packages.stdout)).toMatchObject({
+        modules: [{ id: "@test/app" }, { id: "@test/core" }, { id: "@test/leaf" }],
+      });
+      expect(
+        JSON.parse(packages.stdout).modules.map((module: { id: string }) => module.id),
+      ).not.toContain("@test/other");
+    } finally {
+      await removeFixture(packagesRoot);
+    }
+  } finally {
+    await removeFixture(root);
+  }
+});
