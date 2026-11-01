@@ -10,7 +10,7 @@ export {
   findOrphans,
 } from "./graph/queries.ts";
 
-export { filterGraph, cyclicSubgraph } from "./graph/filter.ts";
+export { filterGraph, cyclicSubgraph, reachableSubgraph } from "./graph/filter.ts";
 
 export { renderText } from "./render/text.ts";
 export { renderJson } from "./render/json.ts";
