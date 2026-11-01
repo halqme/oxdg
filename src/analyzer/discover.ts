@@ -1,8 +1,8 @@
-import { lstat, readdir, realpath, stat } from "node:fs/promises";
+import { lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { SOURCE_EXTRACTOR_PLUGINS } from "../plugin/registry.ts";
 import { isNodeModulesPath } from "./npm.ts";
-import { isGitPath } from "./exclude.ts";
+import { isGitPath, type ExcludeMatcher } from "./exclude.ts";
 import type { AnalyzeInput } from "../types/analysis.ts";
 
 const CORE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts"] as const;
@@ -15,7 +15,7 @@ export const DEFAULT_EXTENSIONS = [
 export interface RequiredDiscoveryOptions {
   cwd: string;
   extensions: readonly string[];
-  exclude?: (filePath: string) => boolean;
+  exclude?: ExcludeMatcher;
 }
 
 function compareStrings(left: string, right: string): number {
@@ -37,11 +37,20 @@ function isSupportedFile(filePath: string, extensions: ReadonlySet<string>): boo
 async function addDirectoryFiles(
   directory: string,
   extensions: ReadonlySet<string>,
-  exclude: (filePath: string) => boolean,
+  exclude: ExcludeMatcher,
   files: Set<string>,
 ): Promise<void> {
   const entries = await readdir(directory, { withFileTypes: true });
   entries.sort((left, right) => compareStrings(left.name, right.name));
+
+  const gitignoreEntry = entries.find((entry) => entry.isFile() && entry.name === ".gitignore");
+  if (gitignoreEntry) {
+    if (exclude.registerGitignore) {
+      exclude.registerGitignore(directory, await readFile(join(directory, ".gitignore"), "utf8"));
+    }
+  } else if (exclude.registerNoGitignore) {
+    exclude.registerNoGitignore(directory);
+  }
 
   for (const entry of entries) {
     if (entry.name === ".git" || entry.name === "node_modules") {
@@ -50,6 +59,11 @@ async function addDirectoryFiles(
 
     const entryPath = join(directory, entry.name);
     if (entry.isDirectory()) {
+      // Prune excluded directories early so gitignore / --exclude patterns like
+      // `dist/` do not pay for walking ignored trees.
+      if (exclude(entryPath)) {
+        continue;
+      }
       await addDirectoryFiles(entryPath, extensions, exclude, files);
       continue;
     }
@@ -81,7 +95,7 @@ async function addDirectoryFiles(
 async function inspectInput(
   inputPath: string,
   extensions: ReadonlySet<string>,
-  exclude: (filePath: string) => boolean,
+  exclude: ExcludeMatcher,
   files: Set<string>,
 ): Promise<void> {
   const absolutePath = resolve(inputPath);

@@ -17,6 +17,7 @@ test("accepts image options on either side of the input and rejects invalid mode
     explain: false,
     includeNpm: false,
     includeTypeImports: true,
+    gitignore: true,
   });
   expect(optionFirst).toEqual(inputFirst);
   expect(() => parseCliOptions(["src", "--json", "--d2"])).toThrow("mutually exclusive");
@@ -108,6 +109,8 @@ test("parses Commander aliases and analysis options", () => {
     failOnCircular: true,
   });
   expect(parseCliOptions(["src", "--no-type-imports"]).includeTypeImports).toBe(false);
+  expect(parseCliOptions(["src"]).gitignore).toBe(true);
+  expect(parseCliOptions(["src", "--no-gitignore"]).gitignore).toBe(false);
   expect(() => parseCliOptions(["src", "--orphans", "--circular"])).toThrow(
     "cannot be combined with --circular",
   );

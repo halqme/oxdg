@@ -4,7 +4,7 @@ import { ResolverFactory } from "oxc-resolver";
 import { parse } from "yaml";
 import { analyze } from "./analyze.ts";
 import { discoverFiles, DEFAULT_EXTENSIONS } from "./discover.ts";
-import { createExcludeMatcher } from "./exclude.ts";
+import { createExcludeMatcher, resolveExplicitRoots } from "./exclude.ts";
 import { createGraphBuilder } from "../graph/graph.ts";
 import type {
   AnalysisResult,
@@ -113,9 +113,25 @@ export async function analyzePackages(
   for (const pkg of packages) builder.addNode(pkg);
   const ownership = [...packages].sort((a, b) => b.absolutePath.length - a.absolutePath.length);
   const owner = (path: string) => ownership.find((pkg) => contains(pkg.absolutePath, path));
-  const matchesExclude = createExcludeMatcher(options.exclude, await realpath(cwd));
-  const isExcluded = (path: string) =>
-    matchesExclude(path) || excludedDirectories.some((directory) => contains(directory, path));
+  const explicitRoots = await resolveExplicitRoots(input, cwd);
+  const matchesExclude = await createExcludeMatcher({
+    rootDir: await realpath(cwd),
+    explicitRoots,
+    ...(options.exclude === undefined ? {} : { patterns: options.exclude }),
+    ...(options.gitignore === undefined ? {} : { gitignore: options.gitignore }),
+  });
+  const isExcluded = Object.assign(
+    (path: string) =>
+      matchesExclude(path) || excludedDirectories.some((directory) => contains(directory, path)),
+    {
+      ...(matchesExclude.registerGitignore
+        ? { registerGitignore: matchesExclude.registerGitignore }
+        : {}),
+      ...(matchesExclude.registerNoGitignore
+        ? { registerNoGitignore: matchesExclude.registerNoGitignore }
+        : {}),
+    },
+  );
   const files = await discoverFiles(
     packages.map((pkg) => pkg.absolutePath),
     {

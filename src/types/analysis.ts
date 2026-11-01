@@ -55,6 +55,12 @@ export interface AnalyzeOptions {
 
   /** Gitignore patterns relative to cwd for excluded modules, evaluated in order. */
   exclude?: ExcludePattern | readonly ExcludePattern[];
+
+  /**
+   * Load `.gitignore` files under cwd and exclude matching modules.
+   * Nested `.gitignore` files apply within their directory. Default: true.
+   */
+  gitignore?: boolean;
 }
 
 export type AnalyzeInput = string | readonly string[];
