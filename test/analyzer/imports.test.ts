@@ -46,6 +46,36 @@ describe("dependency extraction", () => {
     ]);
   });
 
+  test("extracts export-default-from proposal re-exports without parse errors", () => {
+    const source = [
+      'export someDefault from "./a";',
+      'export default from "./b";',
+      'import { x } from "./c";',
+      'export { y } from "./d";',
+    ].join("\n");
+    const result = extractImports(source, "sample.js", true);
+
+    expect(result.imports).toEqual([
+      { specifier: "./a", kind: "re-export", typeOnly: false, location: { line: 1 } },
+      { specifier: "./b", kind: "re-export", typeOnly: false, location: { line: 2 } },
+      { specifier: "./c", kind: "import", typeOnly: false, location: { line: 3 } },
+      { specifier: "./d", kind: "re-export", typeOnly: false, location: { line: 4 } },
+    ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("keeps real parse errors after recovering export-default-from", () => {
+    const result = extractImports(
+      ['export someDefault from "./a";', "const value = ;"].join("\n"),
+      "sample.js",
+    );
+
+    expect(result.imports).toEqual([{ specifier: "./a", kind: "re-export", typeOnly: false }]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({ code: "parse-error", file: "sample.js" }),
+    ]);
+  });
+
   test("extracts dynamic import dependencies", () => {
     const result = extractImports('import("./dynamic.js");', "sample.ts");
 

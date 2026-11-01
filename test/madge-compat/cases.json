@@ -615,8 +615,7 @@
     "cwd": "es6/re-export",
     "input": "c.js",
     "disposition": "compare",
-    "baseline": "difference",
-    "difference": "Oxc rejects the export-default-from proposal syntax."
+    "baseline": "match"
   },
   {
     "id": "es6:05",

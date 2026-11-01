@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Record dependencies from the export-default-from proposal (`export v from "mod"` and `export default from "mod"`) without parse errors, including sibling imports in the same file.
+
 ## [0.6.0] - 2026-10-29
 
 ### Maintenance
