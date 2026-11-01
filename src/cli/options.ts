@@ -21,6 +21,7 @@ export interface CliOptions {
   includeTypeImports: boolean;
   extensions?: string[];
   exclude?: string[];
+  gitignore: boolean;
   help?: boolean;
   version?: boolean;
 }
@@ -55,6 +56,7 @@ interface CommanderOptions {
   typeImports?: boolean;
   extensions?: string[];
   exclude?: string[];
+  gitignore?: boolean;
 }
 
 const GRAPH_DIRECTIONS = ["LR", "RL", "TB", "BT"] as const satisfies readonly GraphDirection[];
@@ -114,6 +116,7 @@ function createProgram(): Command {
     .option("--no-type-imports", "exclude type-only imports")
     .option("--extensions <list>", "comma-separated source file extensions", parseExtensions)
     .option("--exclude <pattern>", "exclude a gitignore pattern relative to cwd", collectExclude)
+    .option("--no-gitignore", "do not load .gitignore files")
     .helpOption("-h, --help", "show this help")
     .version(packageVersion, "-v, --version")
     .exitOverride();
@@ -131,6 +134,7 @@ function defaults(overrides: Partial<CliOptions> = {}): CliOptions {
     explain: false,
     includeNpm: false,
     includeTypeImports: true,
+    gitignore: true,
     ...overrides,
   };
 }
@@ -221,6 +225,7 @@ export function parseCliOptions(argv: readonly string[]): CliOptions {
     explain: values.explain === true,
     includeNpm: values.includeNpm === true,
     includeTypeImports: values.typeImports !== false,
+    gitignore: values.gitignore !== false,
   });
 
   if (imagePath !== undefined) {

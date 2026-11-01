@@ -135,15 +135,20 @@ npx oxdg ./src/index.ts --image graph.svg
 
 Without an output option, oxdg prints a plain-text dependency graph.
 
-Additional analysis options include `--cwd`, `--tsconfig` (or `--ts-config`), `--include-npm`, `--no-type-imports`, `--extensions ts,tsx`, and repeated `--exclude` patterns. With `--include-npm`, resolved npm dependencies appear as package-level nodes (`npm:<package>`); their source files are not analyzed. Mermaid, D2, and SVG distinguish npm nodes by color.
+Additional analysis options include `--cwd`, `--tsconfig` (or `--ts-config`), `--include-npm`, `--no-type-imports`, `--extensions ts,tsx`, repeated `--exclude` patterns, and `--no-gitignore`. With `--include-npm`, resolved npm dependencies appear as package-level nodes (`npm:<package>`); their source files are not analyzed. Mermaid, D2, and SVG distinguish npm nodes by color.
 
 Module resolution first uses the importer's normal TypeScript aliases, package imports/exports, npm packages, and Node.js builtins. If a bare import is not found, oxdg also tries it relative to `cwd`, not the importer's directory or ancestor directories. This fallback supports the configured extensions and directory entrypoints, but cannot escape `cwd` through traversal, symlinks, or package entrypoints. Package export restrictions are not bypassed; `#` imports, URL schemes, absolute paths, and relative imports do not use this fallback. Explicit relative imports and configured aliases can still resolve outside `cwd`.
 
 Paths with an exact `.git` component are always excluded from discovery, explicit inputs, and resolved imports, including symlink targets and paths outside `cwd`. Exclude negations cannot re-include them. No files are changed or deleted; similarly named directories such as `.github` and `.git_tmp` are unaffected. Inputs containing only excluded files produce the usual no-supported-files error.
 
-Exclude strings use gitignore semantics via the `ignore` package, relative to `cwd` (the current directory by default), for discovered project source files and resolved imports. With `--include-npm`, patterns match each resolved package file before its import edge is grouped into the package-level `npm:<package>` node; excluding one subpath does not exclude other imports from that package. For example, `*.test.ts` matches at any depth, `/generated.ts` matches only at the root, `src/generated.ts` matches that path from the root, and `generated/` excludes directories of that name and their contents. Patterns are evaluated in order; `!` re-includes matching paths, but a file cannot be re-included while its parent directory is excluded. Comments (`#`) and backslash escapes follow gitignore syntax. `.gitignore` files are not loaded automatically, and gitignore patterns do not apply to modules outside `cwd`.
+By default, oxdg loads `.gitignore` files from `cwd` downward and excludes matching modules from discovery and resolved imports. Nested `.gitignore` files apply within their own directory, including negations. oxdg does not read `.gitignore` files above `cwd`, a global gitignore, or `.git/info/exclude`. A file or directory passed directly on the command line is still analyzed; ignored children of a directly passed directory are still skipped. Use `--no-gitignore` or `gitignore: false` in the API to restore inclusion of gitignored paths.
+
+Exclude strings (`--exclude`) use the same gitignore semantics via the `ignore` package, relative to `cwd` (the current directory by default), and combine with loaded `.gitignore` rules. With `--include-npm`, patterns match each resolved package file before its import edge is grouped into the package-level `npm:<package>` node; excluding one subpath does not exclude other imports from that package. For example, `*.test.ts` matches at any depth, `/generated.ts` matches only at the root, `src/generated.ts` matches that path from the root, and `generated/` excludes directories of that name and their contents. Patterns are evaluated in order; `!` re-includes matching paths, but a file cannot be re-included while its parent directory is excluded. Comments (`#`) and backslash escapes follow gitignore syntax. Gitignore patterns do not apply to modules outside `cwd`.
 
 ```bash
+oxdg .
+oxdg . --no-gitignore
+oxdg dist
 oxdg ./src --exclude '*.test.ts' --exclude '!src/keep.test.ts'
 oxdg ./src --exclude 'generated/' --exclude '/src/legacy.ts'
 ```

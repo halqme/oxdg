@@ -80,6 +80,7 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
       includeNpm: cliOptions.includeNpm,
       includeTypeImports: cliOptions.includeTypeImports,
       explain: cliOptions.explain,
+      gitignore: cliOptions.gitignore,
     };
     if (cliOptions.cwd !== undefined) {
       analysisOptions.cwd = cliOptions.cwd;

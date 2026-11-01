@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Load `.gitignore` files under the analysis root by default for discovery and resolved imports. Nested files apply within their directory. Use `--no-gitignore` or `gitignore: false` to keep previously included ignored paths. Paths passed directly on the command line are still analyzed.
+
 ## [0.6.0] - 2026-10-29
 
 ### Maintenance

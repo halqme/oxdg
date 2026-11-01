@@ -35,6 +35,31 @@ function runCliIn(
   };
 }
 
+test("loads .gitignore by default and supports --no-gitignore", async () => {
+  const root = await createFixture({
+    ".gitignore": "ignored.ts\n",
+    "src/entry.ts": 'import "./ignored.ts";\nimport "./keep.ts";\n',
+    "src/ignored.ts": "export {};\n",
+    "src/keep.ts": "export {};\n",
+  });
+  try {
+    const withGitignore = runCli("src", "--cwd", root, "--json");
+    expect(withGitignore.status).toBe(0);
+    expect(JSON.parse(withGitignore.stdout)).toMatchObject({
+      modules: [{ id: "src/entry.ts" }, { id: "src/keep.ts" }],
+      dependencies: [{ from: "src/entry.ts", to: "src/keep.ts", status: "internal" }],
+    });
+
+    const withoutGitignore = runCli("src", "--cwd", root, "--json", "--no-gitignore");
+    expect(withoutGitignore.status).toBe(0);
+    expect(
+      JSON.parse(withoutGitignore.stdout).modules.map((module: { id: string }) => module.id),
+    ).toEqual(["src/entry.ts", "src/ignored.ts", "src/keep.ts"]);
+  } finally {
+    await removeFixture(root);
+  }
+});
+
 test("applies repeated gitignore exclusions in order relative to --cwd", async () => {
   const root = await createFixture({
     "src/entry.ts": 'import "./keep.test.ts";\nimport "./drop.test.ts";\n',

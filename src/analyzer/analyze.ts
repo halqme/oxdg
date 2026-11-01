@@ -4,7 +4,7 @@ import { discoverFiles, DEFAULT_EXTENSIONS } from "./discover.ts";
 import { extractImports } from "./imports.ts";
 import type { ImportReference } from "../plugin/types.ts";
 import { createResolver } from "./resolver.ts";
-import { createExcludeMatcher } from "./exclude.ts";
+import { createExcludeMatcher, resolveExplicitRoots } from "./exclude.ts";
 import { npmPackageFromPath } from "./npm.ts";
 import { createGraphBuilder } from "../graph/graph.ts";
 import type {
@@ -89,7 +89,13 @@ export async function analyze(
   const extensions = normalizeExtensions(options.extensions ?? DEFAULT_EXTENSIONS);
   const includeNpm = options.includeNpm ?? false;
   const includeTypeImports = options.includeTypeImports ?? true;
-  const isExcluded = createExcludeMatcher(options.exclude, canonicalRoot);
+  const explicitRoots = await resolveExplicitRoots(input, cwd);
+  const isExcluded = await createExcludeMatcher({
+    rootDir: canonicalRoot,
+    explicitRoots,
+    ...(options.exclude === undefined ? {} : { patterns: options.exclude }),
+    ...(options.gitignore === undefined ? {} : { gitignore: options.gitignore }),
+  });
   const files = await discoverFiles(input, {
     cwd,
     extensions,
